@@ -1,5 +1,3 @@
-# main.py
-
 import customtkinter as ctk
 import sys
 import os
@@ -7,6 +5,8 @@ import os
 # Asegurar que Python encuentre los módulos
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+
+from database.schema_setup import create_tables 
 from controllers.auth_controller import AuthController
 from views.login_view import LoginView
 from views.dashboard_view import DashboardView
@@ -114,6 +114,8 @@ class MainApp(ctk.CTk):
             widget.destroy()
         
         # Crear y empaquetar la nueva vista
+        # Nota: Aquí se pasa self.auth_controller para que las vistas puedan acceder a la información del usuario
+        # y quizás a métodos de la DB a través del controlador, siguiendo el patrón MVC.
         ViewClass(master_frame, self.auth_controller).pack(fill="both", expand=True)
 
 
@@ -122,7 +124,9 @@ class MainApp(ctk.CTk):
         self.mostrar_login()
 
 if __name__ == "__main__":
+    # --- LLAMADO CRÍTICO: Inicialización de la Base de Datos ---
+    create_tables()
+    # -----------------------------------------------------------
+    
     app = MainApp()
     app.mainloop()
-    
-    
