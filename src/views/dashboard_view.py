@@ -12,7 +12,6 @@ class DashboardView(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         
-        # 1. Sidebar (Columna 0)
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
 
@@ -48,13 +47,11 @@ class DashboardView(ctk.CTkFrame):
         elif self.rol == "Administrador":
             opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView")]
         
-        # Creación de botones
         for nombre, view_key in opciones:
             btn = ctk.CTkButton(self.menu_frame, text=nombre, fg_color="transparent", border_width=1,
                                 command=lambda key=view_key: self.switch_module_callback(key))
             btn.pack(fill="x", pady=5, padx=10)
             
-        # ¡IMPORTANTE! Hemos eliminado la llamada: self.switch_module_callback(opciones[0][1])
 
     def get_main_area(self):
         return self.main_area

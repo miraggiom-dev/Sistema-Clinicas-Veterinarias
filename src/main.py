@@ -2,7 +2,6 @@ import customtkinter as ctk
 import sys
 import os
 
-# Asegurar que Python encuentre los módulos
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -12,7 +11,6 @@ from views.login_view import LoginView
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView 
 
-# --- PLACEHOLDERS PARA FUTURAS VISTAS ---
 class AppointmentView(ctk.CTkFrame):
     def __init__(self, master, *args, **kwargs):
         super().__init__(master)
@@ -37,7 +35,6 @@ VIEW_MAP = {
 }
 
 
-# Configuración global
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
@@ -67,7 +64,6 @@ class MainApp(ctk.CTk):
         if not usuario_data:
             return
 
-        # 1. Crear el Dashboard y ASIGNARLO INMEDIATAMENTE A self.dashboard_view
         self.dashboard_view = DashboardView(
             self, 
             usuario=usuario_data.nombre, 
@@ -75,15 +71,11 @@ class MainApp(ctk.CTk):
             on_logout=self.cerrar_sesion,
             switch_module_callback=self.cambiar_modulo_principal 
         )
-        # 2. Empaquetar el dashboard.
         self.dashboard_view.pack(fill="both", expand=True) 
         
-        # 3. OBTENER EL MÓDULO INICIAL
         initial_module_key = self.determinar_modulo_inicial(usuario_data.rol)
         
-        # 4. PASO CRÍTICO: Usar self.after() para cargar el módulo DESPUÉS de que Tkinter haya terminado de dibujar el Dashboard.
         if initial_module_key:
-            # Ejecutar self.cambiar_modulo_principal(initial_module_key) después de 100ms
             self.after(100, lambda: self.cambiar_modulo_principal(initial_module_key)) 
             
     def determinar_modulo_inicial(self, rol):
@@ -109,13 +101,10 @@ class MainApp(ctk.CTk):
         if not ViewClass:
             return
 
-        # Eliminar cualquier módulo anterior
         for widget in master_frame.winfo_children():
             widget.destroy()
         
-        # Crear y empaquetar la nueva vista
-        # Nota: Aquí se pasa self.auth_controller para que las vistas puedan acceder a la información del usuario
-        # y quizás a métodos de la DB a través del controlador, siguiendo el patrón MVC.
+        
         ViewClass(master_frame, self.auth_controller).pack(fill="both", expand=True)
 
 
