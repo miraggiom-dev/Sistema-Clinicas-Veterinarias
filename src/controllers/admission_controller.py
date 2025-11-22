@@ -4,11 +4,10 @@ import models.mascota_model
 
 class AdmissionController:
     
-    def registrar_nuevo_cliente(self, cedula, nombre, telefono, email, direccion): # <-- NUEVO PARÁMETRO
+    def registrar_nuevo_cliente(self, cedula, nombre, telefono, email, direccion): 
         """Registra un cliente y retorna su ID o None si falló"""
         if not cedula or not nombre:
             return None
-        # Pasamos la cédula al modelo
         return models.propietario_model.PropietarioModel.crear(cedula, nombre, telefono, email, direccion)
 
     def registrar_mascota(self, id_propietario, nombre, especie, raza, nacimiento, genero):
