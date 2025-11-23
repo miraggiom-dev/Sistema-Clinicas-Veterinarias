@@ -94,7 +94,10 @@ class MainApp(ctk.CTk):
         initial_module_key = self.determinar_modulo_inicial(usuario_data.rol)
 
         if initial_module_key:
-            self.after(100, lambda: self.cambiar_modulo_principal(initial_module_key))
+            self.after(100, self._iniciar_modulo_diferido, initial_module_key)
+
+    def _iniciar_modulo_diferido(self, initial_module_key):
+        self.cambiar_modulo_principal(initial_module_key)
 
     def determinar_modulo_inicial(self, rol):
         if rol == "Recepcionista":

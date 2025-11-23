@@ -23,6 +23,10 @@ class LoginView(ctk.CTkFrame):
             self, placeholder_text="Contraseña", show="*", width=300
         )
         self.entry_pass.pack(pady=10)
+        
+        # Bind Enter key
+        self.entry_email.bind("<Return>", self.evento_login)
+        self.entry_pass.bind("<Return>", self.evento_login)
 
         self.btn_login = ctk.CTkButton(
             self, text="Iniciar Sesión", command=self.evento_login, width=300
@@ -32,7 +36,7 @@ class LoginView(ctk.CTkFrame):
         self.lbl_error = ctk.CTkLabel(self, text="", text_color="red")
         self.lbl_error.pack(pady=5)
 
-    def evento_login(self):
+    def evento_login(self, event=None):
         email = self.entry_email.get()
         password = self.entry_pass.get()
 

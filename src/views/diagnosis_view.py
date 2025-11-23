@@ -44,12 +44,17 @@ class DiagnosisView(ctk.CTkFrame):
         )
         self.txt_observacion.pack(pady=5)
 
+        # Bind Enter key
+        self.txt_diagnostico.bind("<Return>", self.registrar_diagnostico)
+        self.txt_tratamiento.bind("<Return>", self.registrar_diagnostico)
+        self.txt_observacion.bind("<Return>", self.registrar_diagnostico)
+
         self.btn_guardar = ctk.CTkButton(
             self, text="Registrar Diagnóstico", command=self.registrar_diagnostico
         )
         self.btn_guardar.pack(pady=15)
 
-    def registrar_diagnostico(self):
+    def registrar_diagnostico(self, event=None):
         from models.cita_model import CitaModel
         from models.usuario_model import UsuarioModel
         from tkinter import END, simpledialog
@@ -100,7 +105,7 @@ class DiagnosisView(ctk.CTkFrame):
             entry_pass = ctk.CTkEntry(popup, show="*", width=220)
             entry_pass.pack(pady=10)
 
-            def intentar_firma():
+            def intentar_firma(event=None):
                 password = entry_pass.get()
                 # Validar contraseña del veterinario en sesión (por email o id)
                 # Se asume que el email del veterinario está en cita["veterinario_email"]
@@ -170,6 +175,6 @@ class DiagnosisView(ctk.CTkFrame):
             )
             btn_firmar.pack(pady=10)
 
-            popup.bind("<Return>", lambda event: intentar_firma())
+            popup.bind("<Return>", intentar_firma)
 
         pedir_contraseña()

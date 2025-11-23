@@ -40,6 +40,13 @@ class MedicationsView(ctk.CTkFrame):
         )
         self.txt_fecha_vencimiento.pack(pady=5)
 
+        # Bind Enter key
+        self.txt_nombre.bind("<Return>", self.registrar_medicamento)
+        self.txt_precio_venta.bind("<Return>", self.registrar_medicamento)
+        self.txt_costo_unitario.bind("<Return>", self.registrar_medicamento)
+        self.txt_stock_actual.bind("<Return>", self.registrar_medicamento)
+        self.txt_fecha_vencimiento.bind("<Return>", self.registrar_medicamento)
+
         self.btn_guardar = ctk.CTkButton(
             self, text="Registrar Medicamento", command=self.registrar_medicamento
         )
@@ -65,7 +72,7 @@ class MedicationsView(ctk.CTkFrame):
         else:
             self.lbl_alerta.configure(text="")
 
-    def registrar_medicamento(self):
+    def registrar_medicamento(self, event=None):
         from models.producto_model import ProductoModel
 
         nombre = self.txt_nombre.get().strip()

@@ -46,6 +46,9 @@ class TreatmentView(ctk.CTkFrame):
         )
         self.txt_cantidad.pack(pady=5)
 
+        # Bind Enter key
+        self.txt_cantidad.bind("<Return>", self.registrar_tratamiento)
+
         self.btn_guardar = ctk.CTkButton(
             self, text="Registrar Receta", command=self.registrar_tratamiento
         )
@@ -69,7 +72,7 @@ class TreatmentView(ctk.CTkFrame):
         else:
             self.lbl_alerta.configure(text="")
 
-    def registrar_tratamiento(self):
+    def registrar_tratamiento(self, event=None):
         from models.cita_model import CitaModel
         from models.diagnostico_model import DiagnosticoModel
         from models.receta_model import RecetaModel
