@@ -4,9 +4,11 @@ import customtkinter as ctk
 from controllers.admission_controller import AdmissionController
 
 class AdmissionView(ctk.CTkFrame):
-    def __init__(self, master, auth_controller):
+    # Firma simple y explícita: (master, auth_controller, id_mascota=None, active_tab=None, switch_callback=None)
+    def __init__(self, master, auth_controller, id_mascota=None, active_tab=None, switch_callback=None):
         super().__init__(master)
         self.auth_controller = auth_controller
+        self.switch_callback = switch_callback
         self.admission_controller = AdmissionController()
         self.propietario_seleccionado = None
         
@@ -65,13 +67,17 @@ class AdmissionView(ctk.CTkFrame):
             
             # Acceso directo a la columna 'cedula'
             cedula_display = prop['cedula'] 
-            info_text = f"Cédula: {cedula_display} | Nombre: {prop['nombre']} | Teléfono: {prop['telefono']}"
+            info_text = f"Cédula: {cedula_display} | Nombre: {prop['nombre']} | Teléfono: {prop['telefono']} | Dirección: {prop['direccion']}"
             ctk.CTkLabel(frame_item, text=info_text, anchor="w").pack(side="left", padx=10)
             
             # Botón para seleccionar y ver mascotas
-            btn_seleccionar = ctk.CTkButton(frame_item, text="Seleccionar", width=100,
+            btn_seleccionar = ctk.CTkButton(frame_item, text="Info", width=100,
                                             command=lambda p=prop: self.seleccionar_propietario(p))
-            btn_seleccionar.pack(side="right", padx=10)
+            btn_seleccionar.pack(side="right", padx=6)
+            # Botón para modificar propietario
+            btn_modificar = ctk.CTkButton(frame_item, text="Modificar", width=100,
+                                           command=lambda p=prop: self.mostrar_modal_editar_propietario(p))
+            btn_modificar.pack(side="right", padx=6)
             self.propietario_widgets[prop['id_propietario']] = btn_seleccionar
 
     def seleccionar_propietario(self, propietario):
@@ -134,6 +140,88 @@ class AdmissionView(ctk.CTkFrame):
         
         ctk.CTkButton(win, text="Guardar Cliente", command=guardar_propietario).pack(pady=10)
 
+    def mostrar_modal_editar_propietario(self, propietario):
+        # Modal para editar datos del propietario (no permite cambiar cédula)
+        win = ctk.CTkToplevel(self)
+        win.title("Editar Propietario")
+        win.geometry("420x420")
+
+        ctk.CTkLabel(win, text="Editar Cliente", font=("Roboto", 18, "bold")).pack(pady=10)
+
+        # Asegurarnos de trabajar con un dict (sqlite3.Row no tiene .get)
+        try:
+            prop = dict(propietario)
+        except Exception:
+            prop = propietario
+
+        # Mostrar cédula pero deshabilitada
+        ctk.CTkLabel(win, text="Cédula (no editable):").pack(anchor="w", padx=10)
+        entry_ced = ctk.CTkEntry(win, width=360)
+        entry_ced.pack(pady=4)
+        entry_ced.insert(0, prop.get('cedula', ''))
+        entry_ced.configure(state="disabled")
+
+        ctk.CTkLabel(win, text="Nombre:").pack(anchor="w", padx=10)
+        entry_nombre = ctk.CTkEntry(win, width=360)
+        entry_nombre.pack(pady=4)
+        entry_nombre.insert(0, prop.get('nombre', '') or '')
+        entry_nombre.configure(state="normal")
+
+        ctk.CTkLabel(win, text="Teléfono:").pack(anchor="w", padx=10)
+        entry_tel = ctk.CTkEntry(win, width=360)
+        entry_tel.pack(pady=4)
+        entry_tel.insert(0, prop.get('telefono', '') or '')
+        entry_tel.configure(state="normal")
+
+        ctk.CTkLabel(win, text="Email:").pack(anchor="w", padx=10)
+        entry_email = ctk.CTkEntry(win, width=360)
+        entry_email.pack(pady=4)
+        entry_email.insert(0, prop.get('email', '') or '')
+        entry_email.configure(state="normal")
+
+        ctk.CTkLabel(win, text="Dirección:").pack(anchor="w", padx=10)
+        entry_dir = ctk.CTkEntry(win, width=360)
+        entry_dir.pack(pady=4)
+        entry_dir.insert(0, prop.get('direccion', '') or '')
+        entry_dir.configure(state="normal")
+
+        lbl_status = ctk.CTkLabel(win, text="")
+        lbl_status.pack(pady=6)
+
+        def guardar_cambios():
+            nombre = entry_nombre.get().strip()
+            telefono = entry_tel.get().strip()
+            email = entry_email.get().strip()
+            direccion = entry_dir.get().strip()
+            result = self.admission_controller.actualizar_cliente(
+                prop.get('id_propietario') if isinstance(prop, dict) else propietario['id_propietario'],
+                nombre=nombre,
+                telefono=telefono,
+                email=email,
+                direccion=direccion
+            )
+            # result puede ser (bool, mensaje) según el modelo
+            if isinstance(result, tuple):
+                success, message = result
+            else:
+                # compatibilidad (si fuera booleano)
+                success = bool(result)
+                message = "" if success else "Error al actualizar."
+
+            if success:
+                lbl_status.configure(text=message or "Datos actualizados.", text_color="green")
+                self.actualizar_lista_propietarios()
+                win.after(1200, win.destroy)
+            else:
+                lbl_status.configure(text=message or "Error al actualizar. Verifique los datos.", text_color="red")
+
+        ctk.CTkButton(win, text="Guardar cambios", command=guardar_cambios).pack(pady=10)
+        # Poner foco en el nombre para indicar edición
+        try:
+            entry_nombre.focus()
+        except Exception:
+            pass
+
     # ------------------------------------------------------------------
     # --- PESTAÑA 2: MASCOTAS ---
     # ------------------------------------------------------------------
@@ -174,9 +262,22 @@ class AdmissionView(ctk.CTkFrame):
             return
 
         for masc in mascotas:
-            # Línea modificada: Eliminamos el ID de la mascota
+            frame_item = ctk.CTkFrame(self.listbox_mascotas, fg_color="transparent")
+            frame_item.pack(fill="x", pady=5)
+
             info_text = f"Nombre: {masc['nombre']} ({masc['especie']} | Raza: {masc['raza']})"
-            ctk.CTkLabel(self.listbox_mascotas, text=info_text, anchor="w").pack(fill="x", padx=10, pady=5)
+            ctk.CTkLabel(frame_item, text=info_text, anchor="w").pack(side="left", padx=10)
+
+            btn_agendar = ctk.CTkButton(frame_item, text="Agendar", width=100,
+                                        command=lambda m=masc: self.ir_agendar(m))
+            btn_agendar.pack(side="right", padx=10)
+
+    def ir_agendar(self, mascota):
+        """Solicita al MainApp cambiar al módulo de citas con la mascota seleccionada."""
+        if not self.switch_callback:
+            return
+        # Pasamos el id de la mascota al módulo de Appointment y solicitamos abrir la pestaña 'Agendar'
+        self.switch_callback("AppointmentView", id_mascota=mascota['id_mascota'], active_tab="Agendar")
 
     def mostrar_formulario_mascota(self):
         if not self.propietario_seleccionado:
@@ -197,7 +298,7 @@ class AdmissionView(ctk.CTkFrame):
         entry_raza = ctk.CTkEntry(win, placeholder_text="Raza", width=300)
         entry_raza.pack(pady=5)
         
-        entry_nacimiento = ctk.CTkEntry(win, placeholder_text="Fecha Nacimiento (YYYY-MM-DD)", width=300)
+        entry_nacimiento = ctk.CTkEntry(win, placeholder_text="Fecha de Nacimiento (YYYY-MM-DD)", width=300)
         entry_nacimiento.pack(pady=5)
         
         genero_var = ctk.StringVar(value="Macho")

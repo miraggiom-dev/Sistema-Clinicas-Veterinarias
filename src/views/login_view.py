@@ -1,4 +1,3 @@
-# views/login_view.py
 import customtkinter as ctk
 
 class LoginView(ctk.CTkFrame):
@@ -9,7 +8,7 @@ class LoginView(ctk.CTkFrame):
         
         self.pack(pady=20, padx=60, fill="both", expand=True)
 
-        self.label_titulo = ctk.CTkLabel(self, text="Sistema Veterinario", font=("Roboto", 24, "bold"))
+        self.label_titulo = ctk.CTkLabel(self, text="Clínica Veterinaria", font=("Roboto", 24, "bold"))
         self.label_titulo.pack(pady=(40, 10))
 
         self.entry_email = ctk.CTkEntry(self, placeholder_text="Correo Electrónico", width=300)
@@ -34,4 +33,4 @@ class LoginView(ctk.CTkFrame):
             self.lbl_error.configure(text="")
             self.on_login_success()
         else:
-            self.lbl_error.configure(text="Credenciales incorrectas")
+            self.lbl_error.configure(text="Credenciales incorrectas.")

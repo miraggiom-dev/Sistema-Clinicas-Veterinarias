@@ -1,6 +1,7 @@
 # views/dashboard_view.py (CORREGIDO)
 
 import customtkinter as ctk
+from views.comprobante_view import ComprobanteView
 
 class DashboardView(ctk.CTkFrame):
     def __init__(self, master, usuario, rol, on_logout, switch_module_callback):
@@ -41,15 +42,19 @@ class DashboardView(ctk.CTkFrame):
 
         opciones = []
         if self.rol == "Recepcionista":
-            opciones = [("Admisión", "AdmissionView"), ("Citas", "AppointmentView")] 
+            opciones = [("Admisión", "AdmissionView"), ("Citas", "AppointmentView"), ("Comprobante", "ComprobanteView")] 
         elif self.rol == "Veterinario":
             opciones = [("Historial Clínico", "HistoryView"), ("Citas", "AppointmentView")]
         elif self.rol == "Administrador":
-            opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView")]
+            opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView"), ("Comprobante", "ComprobanteView")]
         
         for nombre, view_key in opciones:
+            if view_key == 'ComprobanteView':
+                cmd = lambda n=nombre: ComprobanteView(self)
+            else:
+                cmd = lambda key=view_key: self.switch_module_callback(key)
             btn = ctk.CTkButton(self.menu_frame, text=nombre, fg_color="transparent", border_width=1,
-                                command=lambda key=view_key: self.switch_module_callback(key))
+                                command=cmd)
             btn.pack(fill="x", pady=5, padx=10)
             
 
