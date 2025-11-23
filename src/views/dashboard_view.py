@@ -1,5 +1,3 @@
-# views/dashboard_view.py (CORREGIDO)
-
 import customtkinter as ctk
 
 class DashboardView(ctk.CTkFrame):
@@ -9,18 +7,20 @@ class DashboardView(ctk.CTkFrame):
         self.switch_module_callback = switch_module_callback
         self.rol = rol
         
+        # Configuración de grid para ocupar todo el espacio
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         
+        # Sidebar (Columna 0) - Fija
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
 
-        # 2. Área principal de contenido (Columna 1)
+        # Área Principal (Columna 1) - Expansible
         self.main_area = ctk.CTkFrame(self, fg_color="transparent")
         self.main_area.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         
         self.crear_sidebar_widgets(usuario, rol)
-        self.crear_menu_opciones() # Solo crea botones, NO llama a switch_module_callback aquí.
+        self.crear_menu_opciones()
 
     def crear_sidebar_widgets(self, usuario, rol):
         self.lbl_logo = ctk.CTkLabel(self.sidebar, text="VET SYSTEM", font=("Roboto", 20, "bold"))
@@ -35,7 +35,8 @@ class DashboardView(ctk.CTkFrame):
         self.btn_salir = ctk.CTkButton(self.sidebar, text="Cerrar Sesión", command=self.on_logout, fg_color="darkred")
         self.btn_salir.pack(side="bottom", pady=20)
 
-    def crear_menu_opciones(self):
+    def crear_menu_opciones(self, ):
+        # Limpia el menú antes de crear uno nuevo (necesario si el rol cambiara)
         for widget in self.menu_frame.winfo_children():
             widget.destroy()
 
@@ -46,12 +47,22 @@ class DashboardView(ctk.CTkFrame):
             opciones = [("Historial Clínico", "HistoryView"), ("Citas", "AppointmentView")]
         elif self.rol == "Administrador":
             opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView")]
+        elif self.rol == "Farmaceutico":
+            # Opción única para Farmacéutico, ya que FarmaceuticView maneja las pestañas internas
+            opciones = [("Farmacia", "FarmaceuticView")] 
+        else:
+            # Opción por defecto o de fallback si el rol no está reconocido
+            opciones = [("Admisión", "AdmissionView")]
         
         for nombre, view_key in opciones:
-            btn = ctk.CTkButton(self.menu_frame, text=nombre, fg_color="transparent", border_width=1,
+            # El command llama al callback del MainApp con la clave de la vista
+            btn = ctk.CTkButton(self.menu_frame, 
+                                text=nombre, 
+                                fg_color="transparent", 
+                                border_width=1,
                                 command=lambda key=view_key: self.switch_module_callback(key))
             btn.pack(fill="x", pady=5, padx=10)
             
-
     def get_main_area(self):
+        """Retorna el frame principal donde se cargan los módulos."""
         return self.main_area

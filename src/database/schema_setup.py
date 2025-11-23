@@ -218,5 +218,4 @@ def create_tables():
             conn.close()
 
 
-# Exportar la función principal y el nombre de la base de datos si es necesario
 __all__ = ["create_tables", "DB_NAME"]

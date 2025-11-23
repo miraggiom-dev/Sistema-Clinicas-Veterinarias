@@ -1,29 +1,103 @@
 from database.connection import get_db_connection
+from sqlite3 import Error
 
 class ProductoModel:
-    @staticmethod
-    def verificar_stock(id_producto, cantidad_solicitada):
-        """Retorna True si hay stock"""
+    
+    def get_all_products(self):
+        """Obtiene todo el inventario (Query 2)."""
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT stock_actual FROM productos WHERE id_producto = ?", (id_producto,))
-        prod = cursor.fetchone()
-        conn.close()
+        if conn is None: return []
         
-        if prod and prod['stock_actual'] >= cantidad_solicitada:
-            return True
-        return False
-
-    @staticmethod
-    def descontar_stock(id_producto, cantidad):
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        query = """
+        SELECT id_producto, nombre, stock_actual, stock_minimo, 
+               precio_venta, costo_unitario, fecha_vencimiento
+        FROM productos
+        ORDER BY nombre ASC;
+        """
         try:
-            cursor.execute("UPDATE productos SET stock_actual = stock_actual - ? WHERE id_producto = ?", (cantidad, id_producto))
+            cursor = conn.cursor()
+            cursor.execute(query)
+            return cursor.fetchall()
+        except Error as e:
+            print(f"Error al obtener inventario: {e}")
+            return []
+        finally:
+            conn.close()
+
+    def get_low_stock_alerts(self):
+        """Obtiene productos con stock bajo (Query 3A)."""
+        conn = get_db_connection()
+        if conn is None: return []
+
+        query = """
+        SELECT id_producto, nombre, stock_actual, stock_minimo
+        FROM productos
+        WHERE stock_actual <= stock_minimo
+        ORDER BY stock_actual ASC;
+        """
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            return cursor.fetchall()
+        except Error as e:
+            print(f"Error al obtener alertas de stock: {e}")
+            return []
+        finally:
+            conn.close()
+    
+    def get_expiry_alerts(self):
+        """Obtiene productos con vencimiento cercano (Query 3B - 90 días)."""
+        conn = get_db_connection()
+        if conn is None: return []
+
+        query = """
+        SELECT id_producto, nombre, fecha_vencimiento
+        FROM productos
+        WHERE fecha_vencimiento BETWEEN DATE('now') AND DATE('now', '+90 days')
+        ORDER BY fecha_vencimiento ASC;
+        """
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            return cursor.fetchall()
+        except Error as e:
+            print(f"Error al obtener alertas de vencimiento: {e}")
+            return []
+        finally:
+            conn.close()
+            
+    def get_product_stock(self, id_producto):
+        """Obtiene el stock actual de un producto específico."""
+        conn = get_db_connection()
+        if conn is None: return None
+        
+        query = "SELECT stock_actual, nombre FROM productos WHERE id_producto = ?"
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, (id_producto,))
+            return cursor.fetchone()
+        except Error as e:
+            print(f"Error al verificar stock de producto {id_producto}: {e}")
+            return None
+        finally:
+            conn.close()
+            
+    def add_product(self, nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento):
+        """Inserta un nuevo producto al inventario."""
+        conn = get_db_connection()
+        if conn is None: return False
+        
+        query = """
+        INSERT INTO productos (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento))
             conn.commit()
             return True
-        except Exception as e:
-            print(e)
+        except Error as e:
+            print(f"Error al añadir producto: {e}")
             return False
         finally:
             conn.close()

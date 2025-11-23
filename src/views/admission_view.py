@@ -1,5 +1,3 @@
-# views/admission_view.py (CORREGIDO PARA OCULTAR ID DE MASCOTA)
-
 import customtkinter as ctk
 from controllers.admission_controller import AdmissionController
 
@@ -25,22 +23,18 @@ class AdmissionView(ctk.CTkFrame):
         
     
     def crear_tab_propietarios(self, tab):
-        # Frame superior para búsqueda y registro
         frame_busqueda = ctk.CTkFrame(tab)
         frame_busqueda.pack(fill="x", pady=10)
         
-        # Búsqueda ahora puede ser por nombre o cédula
         self.entry_busqueda = ctk.CTkEntry(frame_busqueda, placeholder_text="Buscar por nombre o cédula...", width=250)
         self.entry_busqueda.pack(side="left", padx=10, pady=10)
         
         btn_buscar = ctk.CTkButton(frame_busqueda, text="Buscar", command=self.actualizar_lista_propietarios)
         btn_buscar.pack(side="left", padx=10, pady=10)
         
-        # Botón Nuevo Registro
         btn_nuevo = ctk.CTkButton(frame_busqueda, text="Registrar Nuevo Propietario", command=self.mostrar_formulario_propietario)
         btn_nuevo.pack(side="right", padx=10, pady=10)
 
-        # Lista de propietarios 
         self.listbox_propietarios = ctk.CTkScrollableFrame(tab, label_text="Lista de Clientes Encontrados")
         self.listbox_propietarios.pack(fill="both", expand=True, padx=10, pady=10)
         
