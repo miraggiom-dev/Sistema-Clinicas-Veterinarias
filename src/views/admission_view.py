@@ -23,9 +23,6 @@ class AdmissionView(ctk.CTkFrame):
 
         self.actualizar_lista_propietarios()
         
-    # ------------------------------------------------------------------
-    # --- PESTAÑA 1: CLIENTES/PROPIETARIOS ---
-    # ------------------------------------------------------------------
     
     def crear_tab_propietarios(self, tab):
         # Frame superior para búsqueda y registro

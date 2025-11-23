@@ -1,11 +1,8 @@
-# database/connection.py
-
+from database.schema_setup import DB_NAME
 import sqlite3
-# Es crucial importar Row
 from sqlite3 import Row 
 
 def get_db_connection():
-    conn = sqlite3.connect('veterinaria.db')
-    # ESTO ES LO QUE HACE QUE SE VEAN LOS DATOS POR NOMBRE DE COLUMNA
+    conn = sqlite3.connect(DB_NAME)
     conn.row_factory = Row 
     return conn
