@@ -1,5 +1,30 @@
 from database.connection import get_db_connection
 
+
+class CitaModel:
+    @staticmethod
+    def obtener_por_mascota(id_mascota):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM citas WHERE id_mascota = ? ORDER BY fecha_hora DESC",
+            (id_mascota,),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return rows
+
+    @staticmethod
+    def obtener_ultima_por_mascota(id_mascota):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM citas WHERE id_mascota = ? ORDER BY fecha_hora DESC LIMIT 1",
+            (id_mascota,),
+        )
+        row = cursor.fetchone()
+        conn.close()
+        return row
 class CitaModel:
     def __init__(self, id_cita=None, id_mascota=None, id_veterinario=None, id_servicio=None, fecha_hora=None, fecha_fin=None, estado=None, motivo=None):
         self.id_cita = id_cita
