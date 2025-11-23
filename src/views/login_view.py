@@ -9,9 +9,7 @@ class LoginView(ctk.CTkFrame):
 
         self.pack(pady=20, padx=60, fill="both", expand=True)
 
-        self.label_titulo = ctk.CTkLabel(
-            self, text="Clínica Veterinaria", font=("Roboto", 24, "bold")
-        )
+        self.label_titulo = ctk.CTkLabel(self, text="Clínica Veterinaria", font=("Roboto", 24, "bold"))
         self.label_titulo.pack(pady=(40, 10))
 
         self.entry_email = ctk.CTkEntry(

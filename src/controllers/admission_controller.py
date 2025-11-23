@@ -1,4 +1,3 @@
-
 import models.propietario_model
 import models.mascota_model
 
@@ -22,3 +21,8 @@ class AdmissionController:
 
     def obtener_mascotas_cliente(self, id_propietario):
         return models.mascota_model.MascotaModel.obtener_por_propietario(id_propietario)
+
+    def actualizar_cliente(self, id_propietario, nombre=None, telefono=None, email=None, direccion=None):
+        """Actualiza los datos de un propietario (no permite cambiar cédula)."""
+        # Propagar mensaje para interfaz
+        return models.propietario_model.PropietarioModel.actualizar(id_propietario, nombre=nombre, telefono=telefono, email=email, direccion=direccion)

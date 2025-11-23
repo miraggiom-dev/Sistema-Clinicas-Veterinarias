@@ -4,8 +4,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-
-from database.schema_setup import create_tables
+from database.schema_setup import create_tables 
 from controllers.auth_controller import AuthController
 
 from views.login_view import LoginView
@@ -55,7 +54,7 @@ ctk.set_default_color_theme("blue")
 class MainApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Sistema Integrado de Gestión Veterinaria")
+        self.title("Sistema Integrado de Gestión de Clínicas Veterinarias")
         self.geometry("900x600")
 
         self.auth_controller = AuthController()
@@ -108,7 +107,8 @@ class MainApp(ctk.CTk):
             return "ReportsView"
         return None
 
-    def cambiar_modulo_principal(self, module_key):
+
+    def cambiar_modulo_principal(self, module_key, id_mascota=None, active_tab=None):
         """
         Esta función recibe la clave del módulo y lo carga en el área principal del Dashboard.
         """
@@ -123,6 +123,10 @@ class MainApp(ctk.CTk):
 
         for widget in master_frame.winfo_children():
             widget.destroy()
+
+        # Llamada simple y explícita: pasamos id_mascota y active_tab como parámetros posicionales,
+        # y el callback como último argumento.
+        ViewClass(master_frame, self.auth_controller, id_mascota, active_tab, self.cambiar_modulo_principal).pack(fill="both", expand=True)
 
         usuario_data = self.auth_controller.usuario_actual
 
