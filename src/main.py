@@ -6,7 +6,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database.schema_setup import create_tables 
 from controllers.auth_controller import AuthController
-
 from views.login_view import LoginView
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
@@ -14,14 +13,7 @@ from views.vet_history_view import VetHistoryView
 from views.diagnosis_view import DiagnosisView
 from views.treatment_view import TreatmentView
 from views.medications_view import MedicationsView
-
-
-class AppointmentView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__(master)
-        ctk.CTkLabel(self, text="MÓDULO DE CITAS PENDIENTE", font=("Roboto", 30)).pack(
-            expand=True
-        )
+from views.appointment_view import AppointmentView
 
 
 class ReportsView(ctk.CTkFrame):
@@ -124,20 +116,44 @@ class MainApp(ctk.CTk):
         for widget in master_frame.winfo_children():
             widget.destroy()
 
-        # Llamada simple y explícita: pasamos id_mascota y active_tab como parámetros posicionales,
-        # y el callback como último argumento.
-        ViewClass(master_frame, self.auth_controller, id_mascota, active_tab, self.cambiar_modulo_principal).pack(fill="both", expand=True)
-
         usuario_data = self.auth_controller.usuario_actual
 
-        if module_key == "VetHistoryView" and usuario_data:
+        # Instanciación condicional según el tipo de vista y sus requerimientos
+        if module_key == "AdmissionView":
+            # AdmissionView requiere controlador, parámetros opcionales y callback de navegación
+            ViewClass(
+                master_frame, 
+                self.auth_controller, 
+                id_mascota, 
+                active_tab, 
+                self.cambiar_modulo_principal
+            ).pack(fill="both", expand=True)
+
+        elif module_key == "VetHistoryView" and usuario_data:
+            # VetHistoryView requiere datos del usuario (nombre y rol)
             ViewClass(master_frame, usuario_data.nombre, usuario_data.rol).pack(
                 fill="both", expand=True
             )
-        elif module_key in ["DiagnosisView", "TreatmentView", "MedicationsView"]:
+
+        elif module_key == "AppointmentView":
+             ViewClass(
+                master_frame, 
+                self.auth_controller, 
+                id_mascota, 
+                active_tab, 
+                self.cambiar_modulo_principal
+            ).pack(fill="both", expand=True)
+
+        elif module_key in ["DiagnosisView", "TreatmentView", "MedicationsView", "ReportsView"]:
+            # Vistas que no requieren argumentos adicionales
             ViewClass(master_frame).pack(fill="both", expand=True)
+            
         else:
-            ViewClass(master_frame, self.auth_controller).pack(fill="both", expand=True)
+            # Fallback por si se agrega alguna vista genérica
+            try:
+                ViewClass(master_frame).pack(fill="both", expand=True)
+            except TypeError:
+                print(f"Error al instanciar {module_key}: argumentos no coincidentes.")
 
     def cerrar_sesion(self):
         self.auth_controller.logout()

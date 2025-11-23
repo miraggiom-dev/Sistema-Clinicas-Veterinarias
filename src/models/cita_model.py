@@ -25,7 +25,7 @@ class CitaModel:
         row = cursor.fetchone()
         conn.close()
         return row
-class CitaModel:
+
     def __init__(self, id_cita=None, id_mascota=None, id_veterinario=None, id_servicio=None, fecha_hora=None, fecha_fin=None, estado=None, motivo=None):
         self.id_cita = id_cita
         self.id_mascota = id_mascota
