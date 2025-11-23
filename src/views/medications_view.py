@@ -4,8 +4,8 @@ from tkinter import messagebox
 
 
 class MedicationsView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
+    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
+        super().__init__(master, **kwargs)
         self.medications_controller = MedicationsController()
         self.pack(fill="both", expand=True)
         self.crear_widgets()

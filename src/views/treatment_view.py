@@ -4,8 +4,8 @@ from tkinter import messagebox
 
 
 class TreatmentView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
+    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
+        super().__init__(master, **kwargs)
         self.treatment_controller = TreatmentController()
         self.pack(fill="both", expand=True)
         self.crear_widgets()

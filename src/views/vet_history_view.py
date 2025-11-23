@@ -7,10 +7,17 @@ from models.propietario_model import PropietarioModel
 
 
 class VetHistoryView(ctk.CTkFrame):
-    def __init__(self, master, usuario, rol, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-        self.usuario = usuario
-        self.rol = rol
+    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
+        super().__init__(master, **kwargs)
+        # Si el controlador es AuthController, podemos obtener el usuario actual
+        self.usuario = None
+        self.rol = None
+        if controller and hasattr(controller, 'usuario_actual'):
+             if controller.usuario_actual:
+                self.usuario = controller.usuario_actual.nombre
+                self.rol = controller.usuario_actual.rol
+        
+        self.switch_callback = switch_callback
         self.admission_controller = AdmissionController()
         self.historia_model = HistoriaClinicaModel()
         self.mascota_model = MascotaModel()

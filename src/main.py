@@ -20,13 +20,6 @@ from views.appointment_view import AppointmentView
 
 # --- Vistas de ejemplo ---
 
-class HistoryView(ctk.CTkFrame):
-    # La firma del init debe ser explícita para consumir todos los argumentos.
-    def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
-        super().__init__(master, **kwargs) # Solo pasamos master y **kwargs al padre
-        self.controller = controller
-        ctk.CTkLabel(self, text="MÓDULO DE HISTORIAL CLÍNICO PENDIENTE", font=("Roboto", 30)).pack(expand=True)
-
 class ReportsView(ctk.CTkFrame):
     # La firma del init debe ser explícita.
     def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
@@ -41,9 +34,12 @@ class ReportsView(ctk.CTkFrame):
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
-    "HistoryView": HistoryView,
+    "VetHistoryView": VetHistoryView,
     "ReportsView": ReportsView,
     "FarmaceutaView": FarmaceutaView, # Clave sin tilde
+    "DiagnosisView": DiagnosisView,
+    "TreatmentView": TreatmentView,
+    "MedicationsView": MedicationsView,
 }
 
 
@@ -140,17 +136,6 @@ class MainApp(ctk.CTk):
             active_tab, 
             self.cambiar_modulo_principal
         ).pack(fill="both", expand=True)
-
-        elif module_key in ["DiagnosisView", "TreatmentView", "MedicationsView", "ReportsView"]:
-            # Vistas que no requieren argumentos adicionales
-            ViewClass(master_frame).pack(fill="both", expand=True)
-            
-        else:
-            # Fallback por si se agrega alguna vista genérica
-            try:
-                ViewClass(master_frame).pack(fill="both", expand=True)
-            except TypeError:
-                print(f"Error al instanciar {module_key}: argumentos no coincidentes.")
 
     def cerrar_sesion(self):
         self.auth_controller.logout()

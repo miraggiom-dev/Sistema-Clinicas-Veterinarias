@@ -137,23 +137,62 @@ class ProductoModel:
             return False
         finally:
             conn.close()
-            
-    def add_product(self, nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento):
-        """Inserta un nuevo producto al inventario."""
+
+    @staticmethod
+    def obtener_todos():
+        """Static method for backward compatibility - returns all products"""
         conn = get_db_connection()
-        if conn is None: return False
-        
-        query = """
-        INSERT INTO productos (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """
+        if conn is None:
+            return []
         try:
             cursor = conn.cursor()
-            cursor.execute(query, (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento))
+            cursor.execute("SELECT * FROM productos ORDER BY nombre ASC")
+            return cursor.fetchall()
+        except Error as e:
+            print(f"Error al obtener productos: {e}")
+            return []
+        finally:
+            conn.close()
+
+    @staticmethod
+    def crear(nombre, precio_venta, costo_unitario, stock_actual, fecha_vencimiento):
+        """Static method for backward compatibility - creates a new product"""
+        conn = get_db_connection()
+        if conn is None:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO productos (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento)
+                VALUES (?, ?, ?, ?, 5, ?)
+                """,
+                (nombre, precio_venta, costo_unitario, stock_actual, fecha_vencimiento),
+            )
             conn.commit()
             return True
-        except Error as e:
-            print(f"Error al añadir producto: {e}")
+        except Exception as e:
+            print(f"Error al crear producto: {e}")
+            return False
+        finally:
+            conn.close()
+
+    @staticmethod
+    def descontar_stock(id_producto, cantidad):
+        """Static method for backward compatibility - decrements stock"""
+        conn = get_db_connection()
+        if conn is None:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE productos SET stock_actual = stock_actual - ? WHERE id_producto = ?",
+                (cantidad, id_producto),
+            )
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error al descontar stock: {e}")
             return False
         finally:
             conn.close()
