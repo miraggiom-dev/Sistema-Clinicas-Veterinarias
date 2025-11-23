@@ -1,5 +1,4 @@
 # views/admission_view.py (CORREGIDO PARA OCULTAR ID DE MASCOTA)
-
 import customtkinter as ctk
 from controllers.admission_controller import AdmissionController
 

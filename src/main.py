@@ -5,11 +5,16 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
-from database.schema_setup import create_tables 
+from database.schema_setup import create_tables
 from controllers.auth_controller import AuthController
+
 from views.login_view import LoginView
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
+from views.vet_history_view import VetHistoryView
+from views.diagnosis_view import DiagnosisView
+from views.treatment_view import TreatmentView
+from views.medications_view import MedicationsView
 
 
 class AppointmentView(ctk.CTkFrame):
@@ -18,14 +23,6 @@ class AppointmentView(ctk.CTkFrame):
         ctk.CTkLabel(self, text="MÓDULO DE CITAS PENDIENTE", font=("Roboto", 30)).pack(
             expand=True
         )
-
-
-class HistoryView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__(master)
-        ctk.CTkLabel(
-            self, text="MÓDULO DE HISTORIAL CLÍNICO PENDIENTE", font=("Roboto", 30)
-        ).pack(expand=True)
 
 
 class ReportsView(ctk.CTkFrame):
@@ -43,8 +40,11 @@ class ReportsView(ctk.CTkFrame):
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
-    "HistoryView": HistoryView,
+    "VetHistoryView": VetHistoryView,
     "ReportsView": ReportsView,
+    "DiagnosisView": DiagnosisView,
+    "TreatmentView": TreatmentView,
+    "MedicationsView": MedicationsView,
 }
 
 
@@ -89,18 +89,18 @@ class MainApp(ctk.CTk):
             on_logout=self.cerrar_sesion,
             switch_module_callback=self.cambiar_modulo_principal,
         )
-        self.dashboard_view.pack(fill="both", expand=True) 
-        
+        self.dashboard_view.pack(fill="both", expand=True)
+
         initial_module_key = self.determinar_modulo_inicial(usuario_data.rol)
-        
+
         if initial_module_key:
-            self.after(100, lambda: self.cambiar_modulo_principal(initial_module_key)) 
-            
+            self.after(100, lambda: self.cambiar_modulo_principal(initial_module_key))
+
     def determinar_modulo_inicial(self, rol):
         if rol == "Recepcionista":
             return "AdmissionView"
         elif rol == "Veterinario":
-            return "HistoryView"
+            return "VetHistoryView"
         elif rol == "Administrador":
             return "ReportsView"
         return None
@@ -120,9 +120,17 @@ class MainApp(ctk.CTk):
 
         for widget in master_frame.winfo_children():
             widget.destroy()
-        
-        
-        ViewClass(master_frame, self.auth_controller).pack(fill="both", expand=True)
+
+        usuario_data = self.auth_controller.usuario_actual
+
+        if module_key == "VetHistoryView" and usuario_data:
+            ViewClass(master_frame, usuario_data.nombre, usuario_data.rol).pack(
+                fill="both", expand=True
+            )
+        elif module_key in ["DiagnosisView", "TreatmentView", "MedicationsView"]:
+            ViewClass(master_frame).pack(fill="both", expand=True)
+        else:
+            ViewClass(master_frame, self.auth_controller).pack(fill="both", expand=True)
 
     def cerrar_sesion(self):
         self.auth_controller.logout()
@@ -133,6 +141,6 @@ if __name__ == "__main__":
     # --- LLAMADO CRÍTICO: Inicialización de la Base de Datos ---
     create_tables()
     # -----------------------------------------------------------
-    
+
     app = MainApp()
     app.mainloop()
