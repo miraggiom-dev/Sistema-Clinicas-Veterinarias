@@ -140,6 +140,7 @@ class CitaModel:
         query = """
             SELECT 
                 c.id_cita,
+                c.id_servicio,
                 time(c.fecha_hora) as hora_inicio,
                 time(c.fecha_fin) as hora_fin,
                 m.nombre AS mascota,

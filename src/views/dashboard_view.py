@@ -1,5 +1,3 @@
-# views/dashboard_view.py (CORREGIDO)
-
 import customtkinter as ctk
 from views.comprobante_view import ComprobanteView
 
@@ -17,12 +15,11 @@ class DashboardView(ctk.CTkFrame):
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
 
-        # 2. Área principal de contenido (Columna 1)
         self.main_area = ctk.CTkFrame(self, fg_color="transparent")
         self.main_area.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
         self.crear_sidebar_widgets(usuario, rol)
-        self.crear_menu_opciones()  # Solo crea botones, NO llama a switch_module_callback aquí.
+        self.crear_menu_opciones()
 
     def crear_sidebar_widgets(self, usuario, rol):
         self.lbl_logo = ctk.CTkLabel(
@@ -46,7 +43,9 @@ class DashboardView(ctk.CTkFrame):
         )
         self.btn_salir.pack(side="bottom", pady=20)
 
-    def crear_menu_opciones(self):
+    def crear_menu_opciones(
+        self,
+    ):
         for widget in self.menu_frame.winfo_children():
             widget.destroy()
 
@@ -55,15 +54,16 @@ class DashboardView(ctk.CTkFrame):
             opciones = [("Admisión", "AdmissionView"), ("Citas", "AppointmentView"), ("Comprobante", "ComprobanteView")] 
         elif self.rol == "Veterinario":
             opciones = [
-                ("Historial Clínico", "VetHistoryView"),
+                ("Historial Clínico", "HistoryView"),
                 ("Citas", "AppointmentView"),
-                ("Diagnósticos", "DiagnosisView"),
-                ("Tratamientos", "TreatmentView"),
-                ("Medicamentos", "MedicationsView"),
             ]
         elif self.rol == "Administrador":
-            opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView"), ("Comprobante", "ComprobanteView")]
-        
+            opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView")]
+        elif self.rol == "Farmacéutico":
+            opciones = [("Farmacia", "FarmaceutaView")]
+        else:
+            opciones = [("Admisión", "AdmissionView")]
+
         for nombre, view_key in opciones:
             if view_key == 'ComprobanteView':
                 cmd = lambda n=nombre: ComprobanteView(self)
@@ -74,4 +74,5 @@ class DashboardView(ctk.CTkFrame):
             btn.pack(fill="x", pady=5, padx=10)
 
     def get_main_area(self):
+        """Retorna el frame principal donde se cargan los módulos."""
         return self.main_area

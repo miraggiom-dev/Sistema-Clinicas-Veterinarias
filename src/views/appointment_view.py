@@ -1,8 +1,5 @@
 import customtkinter as ctk
 from functools import partial
-
-# Duración por defecto de una cita en minutos (usada cuando no se especifica hora de fin)
-DEFAULT_DURATION_MIN = 30
 from models.cita_model import CitaModel
 from models.usuario_model import UsuarioModel
 from models.mascota_model import MascotaModel
@@ -20,7 +17,6 @@ class AppointmentView(ctk.CTkFrame):
         super().__init__(master)
         self.auth_controller = auth_controller
 
-        # Forzar el mismo color de fondo que usan las otras vistas (tomado del tema)
         try:
             default_frame_bg = ctk.ThemeManager.theme["CTkFrame"]["fg_color"]
             self.configure(fg_color=default_frame_bg)
@@ -28,10 +24,8 @@ class AppointmentView(ctk.CTkFrame):
         except Exception:
             self._frame_bg = None
 
-        # Empaquetado y paddings alineados con `AdmissionView`
         self.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Usar el mismo ancho de Tabview que en AdmissionView para consistencia visual
         self.tabview = ctk.CTkTabview(self, width=800)
         self.tabview.pack(fill="both", expand=True)
         self.tabview.add("Agenda")
@@ -40,33 +34,28 @@ class AppointmentView(ctk.CTkFrame):
         self._crear_tab_agenda(self.tabview.tab("Agenda"))
         self._crear_tab_agendar(self.tabview.tab("Agendar"))
 
-        # Admission controller para crear/consultar propietarios y mascotas
         self.admission_controller = AdmissionController()
 
-        # Cargar propietarios (necesario para la pestaña Agendar)
         try:
             self._cargar_propietarios()
         except Exception:
             pass
 
-        # Seleccionar pestaña solicitada si se pasó
         if getattr(self, '_requested_active_tab', None) in ("Agenda", "Agendar"):
             try:
                 self.tabview.set(self._requested_active_tab)
             except Exception:
                 pass
 
-        # Cargar lista inicial de veterinarios
         self._cargar_veterinarios()
-        # Cargar lista inicial de servicios
+
         try:
             self._cargar_servicios()
         except Exception:
             pass
 
     def _crear_tab_agenda(self, tab):
-        # Contenedor con padding interior para que la agenda respire
-        # Forzamos el fg_color del tema para que el fondo coincida exactamente
+
         frame_bg = getattr(self, '_frame_bg', None)
         container = ctk.CTkFrame(tab, fg_color=frame_bg)
         container.pack(fill="both", expand=True, padx=10, pady=10)
@@ -81,7 +70,6 @@ class AppointmentView(ctk.CTkFrame):
         btn_cargar = ctk.CTkButton(frame_top, text="Cargar Agenda", command=self.cargar_agenda)
         btn_cargar.pack(side="left", padx=8)
 
-        # Contenedor para lista de citas dentro del container
         self.lista_agenda = ctk.CTkScrollableFrame(container, label_text="Agenda del Día", fg_color=frame_bg)
         self.lista_agenda.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -100,21 +88,19 @@ class AppointmentView(ctk.CTkFrame):
             ctk.CTkLabel(self.lista_agenda, text="No hay citas para esta fecha.", text_color="gray").pack(pady=10)
             return
 
-        # guardar fecha cargada para preseleccionar en el modal de edición
         try:
             self._last_loaded_fecha = fecha
         except Exception:
             self._last_loaded_fecha = None
 
         for r in rows:
-            # cada elemento de la lista usa el color del tema para mantener contraste
             frame = ctk.CTkFrame(self.lista_agenda, fg_color=frame_bg)
             frame.pack(fill="x", pady=5, padx=5)
             texto = f"{r['hora_inicio']} - {r['hora_fin']} | Mascota: {r['mascota']} | Vet: {r['veterinario']} | Servicio: {r['servicio']} | Estado: {r['estado']}"
             ctk.CTkLabel(frame, text=texto, anchor="w").pack(side="left", padx=6)
             btn_edit = ctk.CTkButton(frame, text="Editar", width=90, command=partial(self._abrir_modal_editar, r))
             btn_edit.pack(side="right", padx=6)
-            # usar functools.partial para evitar lambda
+
             try:
                 id_c = r['id_cita']
             except Exception:
@@ -128,8 +114,7 @@ class AppointmentView(ctk.CTkFrame):
             self.cargar_agenda()
 
     def _crear_tab_agendar(self, tab):
-        # Contenedor con padding para que el formulario no quede pegado
-        # Forzamos el mismo fg_color del tema
+
         frame_bg = getattr(self, '_frame_bg', None)
         container = ctk.CTkFrame(tab, fg_color=frame_bg)
         container.pack(fill="both", expand=True, padx=10, pady=10)
@@ -137,7 +122,6 @@ class AppointmentView(ctk.CTkFrame):
         frame = ctk.CTkFrame(container, fg_color=frame_bg)
         frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Campos: Propietario -> Mascota -> Veterinario -> Servicio -> Fecha inicio/fin -> Motivo
         ctk.CTkLabel(frame, text="Propietario:").grid(row=0, column=0, sticky="w", pady=10, padx=(0,12))
         self.prop_var = ctk.StringVar()
         self.opt_propietarios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.prop_var)
@@ -159,15 +143,11 @@ class AppointmentView(ctk.CTkFrame):
         self.serv_var = ctk.StringVar()
         self.opt_servicios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.serv_var)
         self.opt_servicios.grid(row=3, column=1, pady=10, sticky="w")
-        # Nota: se eliminó la opción de crear un servicio desde esta vista. Los servicios
-        # deben crearse desde el módulo de administración correspondiente.
 
-        # Fecha (calendar) y selectores de hora
         ctk.CTkLabel(frame, text="Fecha de la cita (YYYY-MM-DD):").grid(row=4, column=0, sticky="w", pady=6)
         self.date_picker = ctk.CTkEntry(frame, width=120)
         self.date_picker.grid(row=4, column=1, sticky="w", pady=6)
 
-        # Hora inicio
         ctk.CTkLabel(frame, text="Hora inicio:").grid(row=4, column=2, sticky="w", padx=(12,0))
         hours = [f"{h:02d}" for h in range(0,24)]
         minutes = ["00","15","30","45"]
@@ -178,13 +158,11 @@ class AppointmentView(ctk.CTkFrame):
         self.opt_start_min = ctk.CTkOptionMenu(frame, values=minutes, variable=self.start_min_var, width=70)
         self.opt_start_min.grid(row=4, column=4, sticky="w", padx=(6,0))
 
-        # Nota: no pedimos hora de fin; se calcula automáticamente usando duración por defecto
 
         ctk.CTkLabel(frame, text="Motivo:").grid(row=6, column=0, sticky="w", pady=10)
         self.entry_motivo = ctk.CTkEntry(frame, width=220)
         self.entry_motivo.grid(row=6, column=1, pady=10, sticky="ew")
 
-        # Aseguramos que la columna 1 ocupe el espacio disponible
         try:
             frame.grid_columnconfigure(1, weight=1)
         except Exception:
@@ -198,7 +176,7 @@ class AppointmentView(ctk.CTkFrame):
 
     def _cargar_veterinarios(self):
         users = UsuarioModel.obtener_todos()
-        # Los resultados de sqlite pueden ser sqlite3.Row (no tienen .get), así que accedemos por clave con manejo seguro
+
         def _val(item, key):
             try:
                 return item[key]
@@ -209,7 +187,6 @@ class AppointmentView(ctk.CTkFrame):
                     return None
 
         vets = []
-        # mantener mapa id->nombre para preselecciones en modales
         self._vet_map = {}
         if users:
             for u in users:
@@ -232,7 +209,6 @@ class AppointmentView(ctk.CTkFrame):
         valores = [f"{v[0]} - {v[1]}" for v in vets]
         if not valores:
             valores = ["No hay veterinarios"]
-        # Actualizar option menu
         try:
             self.opt_veterinarios.configure(values=valores)
             if valores:
@@ -248,7 +224,6 @@ class AppointmentView(ctk.CTkFrame):
             rows = []
 
         valores = []
-        # map id->name for later lookup
         self._serv_map = {}
         for r in rows:
             try:
@@ -288,18 +263,18 @@ class AppointmentView(ctk.CTkFrame):
         lbl_status = ctk.CTkLabel(win, text="")
         lbl_status.pack(pady=6)
 
-        def guardar_s():
+        """ def guardar_s():
             nombre = entry_nombre.get().strip()
             try:
-                precio = float(entry_precio.get().strip() or 0.0)
+                precio = entry_precio.get().strip() or 0.0
             except Exception:
                 precio = 0.0
             try:
-                costo = float(entry_costo.get().strip() or 0.0)
+                costo = entry_costo.get().strip() or 0.0
             except Exception:
                 costo = 0.0
             try:
-                dur = int(entry_duracion.get().strip() or 30)
+                dur = entry_duracion.get().strip() or 30
             except Exception:
                 dur = 30
 
@@ -311,7 +286,6 @@ class AppointmentView(ctk.CTkFrame):
             if nid:
                 lbl_status.configure(text="Servicio creado.", text_color="green")
                 win.after(500, win.destroy)
-                # recargar servicios y seleccionar el creado
                 try:
                     self._cargar_servicios()
                     formatted = f"{nid} - {nombre}"
@@ -321,9 +295,8 @@ class AppointmentView(ctk.CTkFrame):
             else:
                 lbl_status.configure(text="Error creando servicio.", text_color="red")
 
-        ctk.CTkButton(win, text="Guardar Servicio", command=guardar_s).pack(pady=10)
+        ctk.CTkButton(win, text="Guardar Servicio", command=guardar_s).pack(pady=10) """
 
-    # ---------------------- Propietarios / Mascotas helpers ----------------------
     def _cargar_propietarios(self):
         """Carga los propietarios en el option menu de la pestaña Agendar."""
         try:
@@ -350,7 +323,6 @@ class AppointmentView(ctk.CTkFrame):
         except Exception:
             pass
 
-        # bind para detectar selección de propietario
         try:
             self.prop_var.trace_add('write', self._on_propietario_selected)
         except Exception:
@@ -364,7 +336,6 @@ class AppointmentView(ctk.CTkFrame):
         if not sel:
             return
         if sel.startswith("No hay"):
-            # indicar al usuario que use el botón lateral para crear
             try:
                 self.lbl_status.configure(text="No hay propietarios. Use 'Nuevo Propietario' para crear uno.", text_color="orange")
             except Exception:
@@ -495,7 +466,6 @@ class AppointmentView(ctk.CTkFrame):
 
     def _abrir_modal_editar(self, row):
         """Abre modal para editar una cita existente con selectores de fecha (texto) y hora."""
-        # sqlite3.Row no implementa .get(), así que usamos acceso defensivo
         def _val(item, key, default=None):
             try:
                 return item[key]
@@ -516,7 +486,6 @@ class AppointmentView(ctk.CTkFrame):
         hora_fin = _val(row, 'hora_fin', '10:00:00')
         motivo = _val(row, 'motivo', '')
 
-        # Rehacer modal para que siga el estilo de AdmissionView (pack, ancho fijo, paddings)
         win = ctk.CTkToplevel(self)
         win.title(f"Editar Cita #{id_cita}")
         win.geometry("420x360")
@@ -567,7 +536,6 @@ class AppointmentView(ctk.CTkFrame):
         opt_v = ctk.CTkOptionMenu(container, values=vet_values, variable=vet_var, width=300)
         opt_v.pack(pady=4)
 
-        # Intentar preseleccionar veterinario por nombre
         try:
             vet_name = None
             try:
@@ -591,7 +559,6 @@ class AppointmentView(ctk.CTkFrame):
             except Exception:
                 pass
 
-        # Motivo
         ctk.CTkLabel(container, text="Motivo:").pack(pady=(8,2), anchor="w")
         entry_m = ctk.CTkEntry(container, width=300)
         entry_m.pack(pady=4)
@@ -600,7 +567,6 @@ class AppointmentView(ctk.CTkFrame):
         lbl_err = ctk.CTkLabel(container, text="", text_color="red")
         lbl_err.pack(pady=6)
 
-        # Botones al estilo AdmissionView
         btn_frame = ctk.CTkFrame(container, fg_color=frame_bg)
         btn_frame.pack(fill="x", pady=(8,4))
         spacer = ctk.CTkLabel(btn_frame, text="")
@@ -617,7 +583,16 @@ class AppointmentView(ctk.CTkFrame):
             try:
                 from datetime import datetime, timedelta
                 d1 = datetime.strptime(fecha_ini, '%Y-%m-%d %H:%M:%S')
-                d2 = d1 + timedelta(minutes=DEFAULT_DURATION_MIN)
+                dur_min = 0
+                try:
+                    svc_id = _val(row, 'id_servicio', None)
+                    if svc_id is not None and hasattr(self, '_serv_map'):
+                        svc_entry = self._serv_map.get(svc_id)
+                        if svc_entry and svc_entry.get('duracion'):
+                            dur_min = int(svc_entry.get('duracion') or 0)
+                except Exception:
+                    pass
+                d2 = d1 + timedelta(minutes=dur_min)
                 fecha_ini = d1.strftime('%Y-%m-%d %H:%M:%S')
                 fecha_fin = d2.strftime('%Y-%m-%d %H:%M:%S')
             except Exception:
@@ -636,7 +611,6 @@ class AppointmentView(ctk.CTkFrame):
 
             mot = entry_m.get().strip()
             ok = CitaModel.modificar(id_cita, id_vet, fecha_ini, fecha_fin, mot)
-            # CitaModel.modificar devuelve (bool, mensaje)
             try:
                 success, message = ok
             except Exception:
@@ -668,7 +642,6 @@ class AppointmentView(ctk.CTkFrame):
         ctk.CTkButton(btn_frame, text='Cancelar', command=_close_win).pack(side="right")
 
     def agendar_cita(self):
-        # Obtener mascota seleccionada (debe venir en formato "<id> - <nombre>")
         masc_sel = getattr(self, 'masc_var', None) and self.masc_var.get()
         if not masc_sel or "-" not in masc_sel:
             self.lbl_status.configure(text="Seleccione una mascota válida.", text_color="red")
@@ -685,11 +658,9 @@ class AppointmentView(ctk.CTkFrame):
             return
         id_vet = int(vet_sel.split("-")[0].strip())
 
-        # Obtener id_servicio desde el option menu de servicios
         serv_sel = getattr(self, 'serv_var', None) and self.serv_var.get()
         id_servicio = None
         if not serv_sel or '-' not in serv_sel:
-            # No se permiten crear servicios desde aquí; indicar al usuario que los cree desde administración
             if serv_sel and serv_sel.startswith("No hay"):
                 self.lbl_status.configure(text="No hay servicios. Cree servicios desde el módulo de administración.", text_color="orange")
                 return
@@ -701,11 +672,9 @@ class AppointmentView(ctk.CTkFrame):
                 id_servicio = int(serv_sel.split('-')[0].strip())
             except Exception:
                 id_servicio = None
-        # Construir datetimes desde el date picker y selectores de hora/minuto
         try:
             date_val = self.date_picker.get()
         except Exception:
-            # fallback a campo texto si no hay date_picker
             date_val = getattr(self, 'entry_fecha_ini', None)
             if date_val is not None:
                 try:
@@ -717,16 +686,17 @@ class AppointmentView(ctk.CTkFrame):
         sh = getattr(self, 'start_hour_var', None) and self.start_hour_var.get() or '09'
         sm = getattr(self, 'start_min_var', None) and self.start_min_var.get() or '00'
         fecha_ini = f"{date_val} {sh}:{sm}:00"
-        # calcular fecha_fin usando la duración del servicio si está disponible
+
         try:
             from datetime import datetime, timedelta
             d1 = datetime.strptime(fecha_ini, '%Y-%m-%d %H:%M:%S')
-            dur_min = DEFAULT_DURATION_MIN
+
+            dur_min = 0
             try:
                 if id_servicio is not None and hasattr(self, '_serv_map'):
                     entry = self._serv_map.get(id_servicio)
                     if entry and entry.get('duracion'):
-                        dur_min = int(entry.get('duracion') or dur_min)
+                        dur_min = int(entry.get('duracion') or 0)
             except Exception:
                 pass
             d2 = d1 + timedelta(minutes=dur_min)
@@ -738,30 +708,25 @@ class AppointmentView(ctk.CTkFrame):
         motivo = self.entry_motivo.get().strip()
 
         exito = CitaModel.agendar(id_mascota, id_vet, id_servicio, fecha_ini, fecha_fin, motivo)
-        # CitaModel.agendar ahora devuelve (bool, mensaje)
         try:
             success, message = exito
         except Exception:
-            # Compatibilidad: si alguna otra parte devuelve solo bool
             success = bool(exito)
             message = "Cita agendada correctamente." if success else "Error al agendar cita."
 
         if success:
             self.lbl_status.configure(text=message or "Cita agendada correctamente.", text_color="green")
-            # Limpiar campos
             try:
                 self.masc_var.set("")
             except Exception:
                 pass
             try:
-                # limpiar selección de servicio
                 if getattr(self, 'serv_var', None):
                     self.serv_var.set("")
             except Exception:
                 pass
             try:
                 if hasattr(self, 'date_picker'):
-                    # date_picker es un CTkEntry: limpiar y setear al día de hoy
                     import datetime
                     today = datetime.date.today().strftime('%Y-%m-%d')
                     try:
