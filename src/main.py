@@ -6,7 +6,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database.schema_setup import create_tables 
 from controllers.auth_controller import AuthController 
-
 from controllers.farmaceuta_controller import FarmaceutaController 
 from views.farmaceuta_view import FarmaceutaView 
 
@@ -15,24 +14,32 @@ from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
 from views.appointment_view import AppointmentView
 
+# --- Vistas de ejemplo ---
+
 class HistoryView(ctk.CTkFrame):
-    def __init__(self, master, controller, *args, **kwargs):
-        super().__init__(master)
+    # La firma del init debe ser explícita para consumir todos los argumentos.
+    def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
+        super().__init__(master, **kwargs) # Solo pasamos master y **kwargs al padre
+        self.controller = controller
         ctk.CTkLabel(self, text="MÓDULO DE HISTORIAL CLÍNICO PENDIENTE", font=("Roboto", 30)).pack(expand=True)
 
 class ReportsView(ctk.CTkFrame):
-    def __init__(self, master, controller, *args, **kwargs):
-        super().__init__(master)
+    # La firma del init debe ser explícita.
+    def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
+        super().__init__(master, **kwargs)
+        self.controller = controller
         ctk.CTkLabel(
             self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
         ).pack(expand=True)
+        
+# --- MAPEO DE VISTAS ---
 
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
     "HistoryView": HistoryView,
     "ReportsView": ReportsView,
-    "FarmaceutaView": FarmaceutaView, 
+    "FarmaceutaView": FarmaceutaView, # Clave sin tilde
 }
 
 
@@ -83,7 +90,6 @@ class MainApp(ctk.CTk):
         initial_module_key = self.determinar_modulo_inicial(usuario_data.rol)
 
         if initial_module_key:
-            # Cargar el módulo inicial poco después para asegurar que el dashboard esté listo
             self.after(100, lambda: self.cambiar_modulo_principal(initial_module_key))
 
     def determinar_modulo_inicial(self, rol):
@@ -114,10 +120,22 @@ class MainApp(ctk.CTk):
 
         for widget in master_frame.winfo_children():
             widget.destroy()
+            
+        # CORRECCIÓN 2: Determinar el controlador a usar basado en el módulo
+        if module_key == "FarmaceutaView":
+            controller_a_usar = self.farmaceuta_controller
+        else:
+            # Usar auth_controller por defecto, o definir otros controladores
+            controller_a_usar = self.auth_controller
 
-        # Llamada simple y explícita: pasamos id_mascota y active_tab como parámetros posicionales,
-        # y el callback como último argumento.
-        ViewClass(master_frame, self.auth_controller, id_mascota, active_tab, self.cambiar_modulo_principal).pack(fill="both", expand=True)
+        # Pasar el controlador correcto
+        ViewClass(
+            master_frame, 
+            controller_a_usar, # <-- ¡El controlador correcto se pasa aquí!
+            id_mascota, 
+            active_tab, 
+            self.cambiar_modulo_principal
+        ).pack(fill="both", expand=True)
 
 
     def cerrar_sesion(self):
