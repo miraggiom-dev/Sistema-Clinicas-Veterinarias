@@ -24,9 +24,7 @@ class ReportsView(ctk.CTkFrame):
         ).pack(expand=True)
 
 
-# ----------------------------------------
-
-
+# -----------------------
 # Mapeo de Vistas
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
