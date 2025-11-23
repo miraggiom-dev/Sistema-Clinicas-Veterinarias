@@ -263,18 +263,18 @@ class AppointmentView(ctk.CTkFrame):
         lbl_status = ctk.CTkLabel(win, text="")
         lbl_status.pack(pady=6)
 
-        def guardar_s():
+        """ def guardar_s():
             nombre = entry_nombre.get().strip()
             try:
-                precio = float(entry_precio.get().strip() or 0.0)
+                precio = entry_precio.get().strip() or 0.0
             except Exception:
                 precio = 0.0
             try:
-                costo = float(entry_costo.get().strip() or 0.0)
+                costo = entry_costo.get().strip() or 0.0
             except Exception:
                 costo = 0.0
             try:
-                dur = int(entry_duracion.get().strip() or 30)
+                dur = entry_duracion.get().strip() or 30
             except Exception:
                 dur = 30
 
@@ -295,7 +295,7 @@ class AppointmentView(ctk.CTkFrame):
             else:
                 lbl_status.configure(text="Error creando servicio.", text_color="red")
 
-        ctk.CTkButton(win, text="Guardar Servicio", command=guardar_s).pack(pady=10)
+        ctk.CTkButton(win, text="Guardar Servicio", command=guardar_s).pack(pady=10) """
 
     def _cargar_propietarios(self):
         """Carga los propietarios en el option menu de la pestaña Agendar."""

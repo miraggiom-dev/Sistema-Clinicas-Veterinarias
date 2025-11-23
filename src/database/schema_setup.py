@@ -48,9 +48,7 @@ def create_tables():
     """
     conn = None
     try:
-        # Se conecta a la DB. Si el archivo no existe, lo crea.
         conn = sqlite3.connect(DB_NAME)
-        # Habilitar el soporte de claves foráneas
         conn.execute("PRAGMA foreign_keys = ON;")
         cursor = conn.cursor()
 
@@ -218,5 +216,4 @@ def create_tables():
             conn.close()
 
 
-# Exportar la función principal y el nombre de la base de datos si es necesario
 __all__ = ["create_tables", "DB_NAME"]
