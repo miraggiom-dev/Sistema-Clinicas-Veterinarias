@@ -62,7 +62,7 @@ class DashboardView(ctk.CTkFrame):
                 ("Medicamentos", "MedicationsView"),
             ]
         elif self.rol == "Administrador":
-            opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView"), ("Comprobante", "ComprobanteView")]
+            opciones = [("Reportes", "ReportsView"), ("Usuarios", "UsersView")]
         
         for nombre, view_key in opciones:
             if view_key == 'ComprobanteView':
