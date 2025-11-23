@@ -23,7 +23,7 @@ def _resolve_db_path():
     else:
         # Ruta por defecto
         path = os.path.join(os.getcwd(), "veterinaria.db")
-        print("la ruta creada es", path)
+        print("La ruta creada es: ", path)
 
     p = Path(path).expanduser().resolve()
 
@@ -95,7 +95,7 @@ def create_tables():
         """
         )
 
-        # 4. Tabla de Servicios (Costo de procedimientos)
+        # 4. Tabla de Servicios
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS servicios (
@@ -109,7 +109,7 @@ def create_tables():
         """
         )
 
-        # 5. Tabla de Mascotas (Referencia a Propietarios)
+        # 5. Tabla de Mascotas
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS mascotas (
