@@ -5,3 +5,5 @@ __pycache__/
 .venv/
 venv/
 env/
+# Ignorar carpetas de comprobantes generadas
+**/comprobantes/

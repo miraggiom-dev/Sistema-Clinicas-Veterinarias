@@ -1,6 +1,5 @@
-# models/propietario_model.py (CORREGIDO)
-
 from database.connection import get_db_connection
+import re
 
 class PropietarioModel:
     def __init__(self, id_prop=None, cedula=None, nombre=None, telefono=None, email=None, direccion=None):
@@ -16,7 +15,7 @@ class PropietarioModel:
         """Verifica si una cédula ya está registrada en la base de datos."""
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Excluimos el valor 'N/A' si quieres que existan múltiples clientes antiguos sin cédula
+
         cursor.execute("SELECT 1 FROM propietarios WHERE cedula = ? AND cedula != 'N/A'", (cedula,))
         result = cursor.fetchone()
         conn.close()
@@ -24,7 +23,7 @@ class PropietarioModel:
 
     @staticmethod
     def crear(cedula, nombre, telefono, email, direccion):
-        # 1. Validación de Cédula: Evita crear si la cédula ya existe (y no es el valor de relleno 'N/A')
+
         if cedula != 'N/A' and PropietarioModel.existe_cedula(cedula):
             print(f"Error: La cédula {cedula} ya existe.")
             return None 
@@ -40,7 +39,7 @@ class PropietarioModel:
             conn.commit()
             return cursor.lastrowid
         except Exception as e:
-            # Esto atrapará errores como el UNIQUE constraint si la DB lo tiene
+
             print(f"Error creando propietario (DB): {e}") 
             return None
         finally:
@@ -50,7 +49,7 @@ class PropietarioModel:
     def buscar_por_nombre(busqueda):
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Búsqueda flexible por nombre O por cédula
+
         query = "SELECT * FROM propietarios WHERE nombre LIKE ? OR cedula LIKE ?"
         cursor.execute(query, (f'%{busqueda}%', f'%{busqueda}%'))
         rows = cursor.fetchall()
@@ -65,4 +64,77 @@ class PropietarioModel:
         row = cursor.fetchone()
         conn.close()
         return row
+
+    @staticmethod
+    def _is_valid_telefono(telefono):
+        """Valida que el teléfono contenga sólo dígitos y tenga una longitud razonable."""
+        if telefono is None:
+            return True
+        tel = str(telefono).strip()
+        if tel == "":
+            return True
+        # permitir sólo dígitos (sin signos ni espacios)
+        return bool(re.fullmatch(r"\d{6,15}", tel))
+
+    @staticmethod
+    def _is_valid_email(email):
+        if email is None:
+            return True
+        em = str(email).strip()
+        if em == "":
+            return True
+        # validación básica de email
+        return bool(re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", em))
+
+    @staticmethod
+    def actualizar(id_propietario, nombre=None, telefono=None, email=None, direccion=None):
+        """Actualiza los campos (excepto la cédula) de un propietario.
+
+        Retorna una tupla (success: bool, message: str).
+        """
+        # Validaciones
+        if nombre is not None:
+            if str(nombre).strip() == "":
+                return (False, "El nombre no puede quedar vacío.")
+
+        if not PropietarioModel._is_valid_telefono(telefono):
+            return (False, "Teléfono inválido. Debe contener sólo dígitos (6-15).")
+
+        if not PropietarioModel._is_valid_email(email):
+            return (False, "Email inválido.")
+
+        # Construir query dinámico sólo con campos proporcionados
+        fields = []
+        params = []
+        if nombre is not None:
+            fields.append("nombre = ?")
+            params.append(str(nombre).strip())
+        if telefono is not None:
+            params.append(str(telefono).strip())
+            fields.append("telefono = ?")
+        if email is not None:
+            fields.append("email = ?")
+            params.append(str(email).strip())
+        if direccion is not None:
+            fields.append("direccion = ?")
+            params.append(str(direccion).strip())
+
+        if not fields:
+            # nada para actualizar
+            return (False, "No hay campos para actualizar.")
+
+        params.append(id_propietario)
+
+        query = f"UPDATE propietarios SET {', '.join(fields)} WHERE id_propietario = ?"
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, tuple(params))
+            conn.commit()
+            return (True, "Datos actualizados correctamente.")
+        except Exception as e:
+            return (False, f"Error actualizando propietario: {e}")
+        finally:
+            conn.close()
     
