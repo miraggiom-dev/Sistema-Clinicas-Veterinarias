@@ -4,16 +4,19 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database.schema_setup import create_tables
-from controllers.auth_controller import AuthController
-from views.login_view import LoginView
+from database.schema_setup import create_tables 
+from controllers.auth_controller import AuthController 
+
+from controllers.farmaceuta_controller import FarmaceutaController 
+from views.farmaceuta_view import FarmaceutaView 
+
+from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
-from views.farmaceutica_view import Farmaceuta_view 
 
 
 class AppointmentView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
+    def __init__(self, master, controller, *args, **kwargs): 
         super().__init__(master)
         ctk.CTkLabel(self, text="MÓDULO DE CITAS PENDIENTE", font=("Roboto", 30)).pack(
             expand=True
@@ -21,7 +24,7 @@ class AppointmentView(ctk.CTkFrame):
 
 
 class HistoryView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
+    def __init__(self, master, controller, *args, **kwargs):
         super().__init__(master)
         ctk.CTkLabel(
             self, text="MÓDULO DE HISTORIAL CLÍNICO PENDIENTE", font=("Roboto", 30)
@@ -29,18 +32,18 @@ class HistoryView(ctk.CTkFrame):
 
 
 class ReportsView(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
+    def __init__(self, master, controller, *args, **kwargs):
         super().__init__(master)
         ctk.CTkLabel(
             self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
         ).pack(expand=True)
-
 
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
     "HistoryView": HistoryView,
     "ReportsView": ReportsView,
+    "FarmaceutaView": FarmaceutaView, 
 }
 
 
@@ -54,7 +57,8 @@ class MainApp(ctk.CTk):
         self.title("Sistema Integrado de Gestión Veterinaria")
         self.geometry("900x600")
 
-        self.auth_controller = AuthController()
+        self.auth_controller = AuthController() 
+        self.farmaceuta_controller = FarmaceutaController()
         self.dashboard_view = None
 
         self.mostrar_login()
@@ -99,8 +103,8 @@ class MainApp(ctk.CTk):
             return "HistoryView"
         elif rol == "Administrador":
             return "ReportsView"
-        elif rol == "Farmaceutico":
-            return "FarmaceuticaView" 
+        elif rol == "Farmacéutico":
+            return "FarmaceutaView" 
         return None
 
     def cambiar_modulo_principal(self, module_key):
@@ -117,7 +121,12 @@ class MainApp(ctk.CTk):
         for widget in master_frame.winfo_children():
             widget.destroy()
 
-        ViewClass(master_frame, self.auth_controller).pack(fill="both", expand=True)
+        controller_to_pass = self.auth_controller 
+        
+        if module_key == "FarmaceutaView":
+            controller_to_pass = self.farmaceuta_controller
+            
+        ViewClass(master_frame, controller=controller_to_pass).pack(fill="both", expand=True)
 
     def cerrar_sesion(self):
         self.auth_controller.logout()
@@ -125,7 +134,12 @@ class MainApp(ctk.CTk):
 
 
 if __name__ == "__main__":
-    create_tables()
+    
+    try:
+        from database.schema_setup import create_tables
+        create_tables()
+    except ImportError:
+        print("Advertencia: No se encontró database/schema_setup.py. Continuando sin inicialización de DB.")
 
     app = MainApp()
     app.mainloop()

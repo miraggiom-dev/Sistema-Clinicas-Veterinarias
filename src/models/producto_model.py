@@ -23,14 +23,46 @@ class ProductoModel:
             return []
         finally:
             conn.close()
+            
+    def get_product_details(self, id_producto):
+        """
+        Obtiene nombre, stock, precio y vencimiento de un producto por su ID.
+        """
+        conn = get_db_connection()
+        if conn is None: return None
+        
+        query = """
+        SELECT id_producto, nombre, stock_actual, precio_venta, fecha_vencimiento
+        FROM productos
+        WHERE id_producto = ?;
+        """
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, (id_producto,))
+            
+            row = cursor.fetchone()
+            if row:
+                return {
+                    "id": row[0],
+                    "nombre": row[1],
+                    "stock": row[2],
+                    "precio": row[3],
+                    "vence": row[4]
+                }
+            return None
+        except Error as e:
+            print(f"Error al obtener detalles de producto {id_producto}: {e}")
+            return None
+        finally:
+            conn.close()
 
     def get_low_stock_alerts(self):
-        """Obtiene productos con stock bajo (Query 3A)."""
+        """Obtiene productos con stock bajo (Query 3A). Retorna (id, nombre, stock_actual)."""
         conn = get_db_connection()
         if conn is None: return []
 
         query = """
-        SELECT id_producto, nombre, stock_actual, stock_minimo
+        SELECT id_producto, nombre, stock_actual
         FROM productos
         WHERE stock_actual <= stock_minimo
         ORDER BY stock_actual ASC;
@@ -38,7 +70,8 @@ class ProductoModel:
         try:
             cursor = conn.cursor()
             cursor.execute(query)
-            return cursor.fetchall()
+            # Retorna una lista de tuplas (id, nombre, stock)
+            return cursor.fetchall() 
         except Error as e:
             print(f"Error al obtener alertas de stock: {e}")
             return []
@@ -46,7 +79,7 @@ class ProductoModel:
             conn.close()
     
     def get_expiry_alerts(self):
-        """Obtiene productos con vencimiento cercano (Query 3B - 90 días)."""
+        """Obtiene productos con vencimiento cercano (Query 3B - 90 días). Retorna (id, nombre, fecha_vencimiento)."""
         conn = get_db_connection()
         if conn is None: return []
 
@@ -59,7 +92,8 @@ class ProductoModel:
         try:
             cursor = conn.cursor()
             cursor.execute(query)
-            return cursor.fetchall()
+            # Retorna una lista de tuplas (id, nombre, fecha)
+            return cursor.fetchall() 
         except Error as e:
             print(f"Error al obtener alertas de vencimiento: {e}")
             return []
@@ -71,14 +105,36 @@ class ProductoModel:
         conn = get_db_connection()
         if conn is None: return None
         
-        query = "SELECT stock_actual, nombre FROM productos WHERE id_producto = ?"
+        query = "SELECT stock_actual FROM productos WHERE id_producto = ?" 
         try:
             cursor = conn.cursor()
             cursor.execute(query, (id_producto,))
-            return cursor.fetchone()
+            row = cursor.fetchone()
+            return row[0] if row else 0 
         except Error as e:
             print(f"Error al verificar stock de producto {id_producto}: {e}")
             return None
+        finally:
+            conn.close()
+            
+    def update_product_stock(self, id_producto, cantidad_vendida):
+        """Actualiza el stock después de una venta."""
+        conn = get_db_connection()
+        if conn is None: return False
+
+        query = """
+        UPDATE productos
+        SET stock_actual = stock_actual - ?
+        WHERE id_producto = ?;
+        """
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, (cantidad_vendida, id_producto))
+            conn.commit()
+            return cursor.rowcount > 0 
+        except Error as e:
+            print(f"Error al actualizar stock: {e}")
+            return False
         finally:
             conn.close()
             
