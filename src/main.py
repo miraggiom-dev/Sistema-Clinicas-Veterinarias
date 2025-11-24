@@ -1,3 +1,6 @@
+from views.users_view import UsersView
+from controllers.historial_diagnostico_controller import HistorialDiagnosticoController
+from views.historial_diagnostico_view import HistorialDiagnosticoView
 import customtkinter as ctk
 import sys
 import os
@@ -8,6 +11,9 @@ from database.schema_setup import create_tables
 from controllers.auth_controller import AuthController 
 from controllers.farmaceuta_controller import FarmaceutaController 
 from views.farmaceuta_view import FarmaceutaView 
+from controllers.reporte_controller import ReporteController
+from controllers.gestion_precios_controller import GestionPreciosController
+from views.gestion_precios_view import GestionPreciosView
 
 from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
@@ -20,14 +26,7 @@ from views.appointment_view import AppointmentView
 
 # --- Vistas de ejemplo ---
 
-class ReportsView(ctk.CTkFrame):
-    # La firma del init debe ser explícita.
-    def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
-        super().__init__(master, **kwargs)
-        self.controller = controller
-        ctk.CTkLabel(
-            self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
-        ).pack(expand=True)
+from views.reporte_view import ReporteView
         
 # --- MAPEO DE VISTAS ---
 
@@ -35,16 +34,19 @@ VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
     "VetHistoryView": VetHistoryView,
-    "ReportsView": ReportsView,
-    "FarmaceutaView": FarmaceutaView, # Clave sin tilde
+    "ReportsView": ReporteView,
+    "FarmaceutaView": FarmaceutaView,
     "DiagnosisView": DiagnosisView,
     "TreatmentView": TreatmentView,
     "MedicationsView": MedicationsView,
+    "UsersView": UsersView,
+    "GestionPreciosView": GestionPreciosView,
 }
 
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
+
 
 
 class MainApp(ctk.CTk):
@@ -55,6 +57,11 @@ class MainApp(ctk.CTk):
 
         self.auth_controller = AuthController() 
         self.farmaceuta_controller = FarmaceutaController()
+        self.reporte_controller = ReporteController()
+        self.gestion_precios_controller = GestionPreciosController()
+        self.historial_diagnostico_controller = HistorialDiagnosticoController()
+        from controllers.users_controller import UsersController
+        self.users_controller = UsersController()
         self.dashboard_view = None
 
         self.mostrar_login()
@@ -88,7 +95,6 @@ class MainApp(ctk.CTk):
         self.dashboard_view.pack(fill="both", expand=True)
 
         initial_module_key = self.determinar_modulo_inicial(usuario_data.rol)
-
         if initial_module_key:
             self.after(100, lambda: self.cambiar_modulo_principal(initial_module_key))
 
@@ -100,7 +106,7 @@ class MainApp(ctk.CTk):
         elif rol == "Administrador":
             return "ReportsView"
         elif rol == "Farmacéutico":
-            return "FarmaceutaView" 
+            return "FarmaceutaView"
         return None
 
 
@@ -121,17 +127,27 @@ class MainApp(ctk.CTk):
         for widget in master_frame.winfo_children():
             widget.destroy()
             
-        # CORRECCIÓN 2: Determinar el controlador a usar basado en el módulo
+
+
+
+        # Determinar el controlador a usar basado en el módulo
         if module_key == "FarmaceutaView":
             controller_a_usar = self.farmaceuta_controller
+        elif module_key == "ReportsView":
+            controller_a_usar = self.reporte_controller
+        elif module_key == "GestionPreciosView":
+            controller_a_usar = self.gestion_precios_controller
+        elif module_key == "HistorialDiagnosticoView":
+            controller_a_usar = self.historial_diagnostico_controller
+        elif module_key == "UsersView":
+            controller_a_usar = self.users_controller
         else:
-            # Usar auth_controller por defecto, o definir otros controladores
             controller_a_usar = self.auth_controller
 
         # Pasar el controlador correcto
         ViewClass(
             master_frame, 
-            controller_a_usar, # <-- ¡El controlador correcto se pasa aquí!
+            controller_a_usar,
             id_mascota, 
             active_tab, 
             self.cambiar_modulo_principal

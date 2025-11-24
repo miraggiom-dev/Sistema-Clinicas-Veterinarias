@@ -2,7 +2,51 @@ from database.connection import get_db_connection
 from sqlite3 import Error
 
 class ProductoModel:
-    
+    def actualizar_producto(self, id_producto, stock_actual, stock_minimo, precio_venta, costo_unitario, fecha_vencimiento):
+        """Actualiza los datos editables de un producto."""
+        conn = get_db_connection()
+        if conn is None:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                UPDATE productos
+                SET stock_actual = ?, stock_minimo = ?, precio_venta = ?, costo_unitario = ?, fecha_vencimiento = ?
+                WHERE id_producto = ?
+                """,
+                (stock_actual, stock_minimo, precio_venta, costo_unitario, fecha_vencimiento, id_producto),
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Error al actualizar producto: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def add_product(self, nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento):
+        """Inserta un nuevo producto al inventario."""
+        conn = get_db_connection()
+        if conn is None:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO productos (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento),
+            )
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error al añadir producto: {e}")
+            return False
+        finally:
+            conn.close()
+
     def get_all_products(self):
         """Obtiene todo el inventario (Query 2)."""
         conn = get_db_connection()
