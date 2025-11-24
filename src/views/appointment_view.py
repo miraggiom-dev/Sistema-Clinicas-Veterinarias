@@ -83,6 +83,11 @@ class AppointmentView(ctk.CTkFrame):
             ctk.CTkLabel(self.lista_agenda, text="Ingrese una fecha válida.", text_color="orange").pack(pady=10)
             return
 
+        import re
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", fecha):
+            ctk.CTkLabel(self.lista_agenda, text="Formato de fecha inválido. Use YYYY-MM-DD.", text_color="red").pack(pady=10)
+            return
+
         rows = CitaModel.obtener_agenda_del_dia(fecha)
         if not rows:
             ctk.CTkLabel(self.lista_agenda, text="No hay citas para esta fecha.", text_color="gray").pack(pady=10)
@@ -122,46 +127,79 @@ class AppointmentView(ctk.CTkFrame):
         frame = ctk.CTkFrame(container, fg_color=frame_bg)
         frame.pack(fill="both", expand=True, padx=10, pady=10)
 
+        # Propietario
         ctk.CTkLabel(frame, text="Propietario:").grid(row=0, column=0, sticky="w", pady=10, padx=(0,12))
         self.prop_var = ctk.StringVar()
-        self.opt_propietarios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.prop_var)
-        self.opt_propietarios.grid(row=0, column=1, pady=10, sticky="w")
-        ctk.CTkButton(frame, text="Nuevo Propietario", width=140, command=self._crear_modal_propietario).grid(row=0, column=2, padx=8)
+        self.opt_propietarios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.prop_var, width=450)
+        self.opt_propietarios.grid(row=0, column=1, columnspan=2, pady=10, sticky="w")
+        
+        # Botón Nuevo Propietario debajo del dropdown
+        ctk.CTkButton(
+            frame, 
+            text="+ Nuevo Propietario", 
+            width=200, 
+            command=self._crear_modal_propietario,
+            fg_color="#2a5a8a",
+            hover_color="#3a6a9a"
+        ).grid(row=1, column=1, pady=(0, 15), sticky="w")
 
-        ctk.CTkLabel(frame, text="Mascota:").grid(row=1, column=0, sticky="w", pady=10)
+        # Mascota
+        ctk.CTkLabel(frame, text="Mascota:").grid(row=2, column=0, sticky="w", pady=10)
         self.masc_var = ctk.StringVar()
-        self.opt_mascotas = ctk.CTkOptionMenu(frame, values=["Seleccione propietario"], variable=self.masc_var)
-        self.opt_mascotas.grid(row=1, column=1, pady=10, sticky="w")
-        ctk.CTkButton(frame, text="Nueva Mascota", width=140, command=self._crear_modal_mascota).grid(row=1, column=2, padx=8)
+        self.opt_mascotas = ctk.CTkOptionMenu(frame, values=["Seleccione propietario"], variable=self.masc_var, width=450)
+        self.opt_mascotas.grid(row=2, column=1, columnspan=2, pady=10, sticky="w")
+        
+        # Botón Nueva Mascota debajo del dropdown
+        ctk.CTkButton(
+            frame, 
+            text="+ Nueva Mascota", 
+            width=200, 
+            command=self._crear_modal_mascota,
+            fg_color="#2a5a8a",
+            hover_color="#3a6a9a"
+        ).grid(row=3, column=1, pady=(0, 15), sticky="w")
 
-        ctk.CTkLabel(frame, text="Veterinario:").grid(row=2, column=0, sticky="w", pady=10)
+        # Veterinario
+        ctk.CTkLabel(frame, text="Veterinario:").grid(row=4, column=0, sticky="w", pady=10)
         self.vet_var = ctk.StringVar()
-        self.opt_veterinarios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.vet_var)
-        self.opt_veterinarios.grid(row=2, column=1, pady=10, sticky="w")
+        self.opt_veterinarios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.vet_var, width=450)
+        self.opt_veterinarios.grid(row=4, column=1, columnspan=2, pady=10, sticky="w")
 
-        ctk.CTkLabel(frame, text="Servicio:").grid(row=3, column=0, sticky="w", pady=10)
+        # Servicio
+        ctk.CTkLabel(frame, text="Servicio:").grid(row=5, column=0, sticky="w", pady=10)
         self.serv_var = ctk.StringVar()
-        self.opt_servicios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.serv_var)
-        self.opt_servicios.grid(row=3, column=1, pady=10, sticky="w")
+        self.opt_servicios = ctk.CTkOptionMenu(frame, values=["Cargando..."], variable=self.serv_var, width=450)
+        self.opt_servicios.grid(row=5, column=1, columnspan=2, pady=10, sticky="w")
 
-        ctk.CTkLabel(frame, text="Fecha de la cita (YYYY-MM-DD):").grid(row=4, column=0, sticky="w", pady=6)
+        # Fecha
+        ctk.CTkLabel(frame, text="Fecha de la cita (YYYY-MM-DD):").grid(row=6, column=0, sticky="w", pady=(6, 20))
         self.date_picker = ctk.CTkEntry(frame, width=120)
-        self.date_picker.grid(row=4, column=1, sticky="w", pady=6)
+        self.date_picker.grid(row=6, column=1, sticky="w", pady=(6, 20))
 
-        ctk.CTkLabel(frame, text="Hora inicio:").grid(row=4, column=2, sticky="w", padx=(12,0))
+
+        ctk.CTkLabel(frame, text="Hora inicio:").grid(row=7, column=0, sticky="w", pady=6)
+        
+        # Frame para hora y minutos juntos
+        time_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        time_frame.grid(row=7, column=1, columnspan=2, sticky="w")
+        
         hours = [f"{h:02d}" for h in range(0,24)]
         minutes = ["00","15","30","45"]
-        self.start_hour_var = ctk.StringVar(value=hours[9])
-        self.start_min_var = ctk.StringVar(value=minutes[0])
-        self.opt_start_hour = ctk.CTkOptionMenu(frame, values=hours, variable=self.start_hour_var, width=70)
-        self.opt_start_hour.grid(row=4, column=3, sticky="w")
-        self.opt_start_min = ctk.CTkOptionMenu(frame, values=minutes, variable=self.start_min_var, width=70)
-        self.opt_start_min.grid(row=4, column=4, sticky="w", padx=(6,0))
+        self.start_hour_var = ctk.StringVar(value="")  # Iniciar vacío
+        self.start_min_var = ctk.StringVar(value="")  # Iniciar vacío
+        
+        self.opt_start_hour = ctk.CTkOptionMenu(time_frame, values=hours, variable=self.start_hour_var, width=70)
+        self.opt_start_hour.pack(side="left", padx=(0, 5))
+        
+        ctk.CTkLabel(time_frame, text=":").pack(side="left")
+        
+        self.opt_start_min = ctk.CTkOptionMenu(time_frame, values=minutes, variable=self.start_min_var, width=70)
+        self.opt_start_min.pack(side="left", padx=(5, 0))
 
 
-        ctk.CTkLabel(frame, text="Motivo:").grid(row=6, column=0, sticky="w", pady=10)
+        ctk.CTkLabel(frame, text="Motivo:").grid(row=8, column=0, sticky="w", pady=10)
         self.entry_motivo = ctk.CTkEntry(frame, width=220)
-        self.entry_motivo.grid(row=6, column=1, pady=10, sticky="ew")
+        self.entry_motivo.grid(row=8, column=1, columnspan=2, pady=10, sticky="ew")
 
         try:
             frame.grid_columnconfigure(1, weight=1)
@@ -169,10 +207,10 @@ class AppointmentView(ctk.CTkFrame):
             pass
 
         self.lbl_status = ctk.CTkLabel(frame, text="", text_color="green")
-        self.lbl_status.grid(row=7, column=0, columnspan=3, pady=12)
+        self.lbl_status.grid(row=9, column=0, columnspan=3, pady=12)
 
         btn_agendar = ctk.CTkButton(frame, text="Agendar Cita", command=self.agendar_cita)
-        btn_agendar.grid(row=8, column=0, columnspan=3, pady=14)
+        btn_agendar.grid(row=10, column=0, columnspan=3, pady=14)
 
     def _cargar_veterinarios(self):
         users = UsuarioModel.obtener_todos()
@@ -211,8 +249,7 @@ class AppointmentView(ctk.CTkFrame):
             valores = ["No hay veterinarios"]
         try:
             self.opt_veterinarios.configure(values=valores)
-            if valores:
-                self.vet_var.set(valores[0])
+            self.vet_var.set("")  # Iniciar vacío
         except Exception:
             pass
 
@@ -240,7 +277,7 @@ class AppointmentView(ctk.CTkFrame):
 
         try:
             self.opt_servicios.configure(values=valores)
-            self.serv_var.set(valores[0])
+            self.serv_var.set("")  # Iniciar vacío
         except Exception:
             pass
 
@@ -273,19 +310,6 @@ class AppointmentView(ctk.CTkFrame):
                 costo = entry_costo.get().strip() or 0.0
             except Exception:
                 costo = 0.0
-            try:
-                dur = entry_duracion.get().strip() or 30
-            except Exception:
-                dur = 30
-
-            if not nombre:
-                lbl_status.configure(text="El nombre es obligatorio.", text_color="red")
-                return
-
-            nid = ServicioModel.crear(nombre, precio, costo, dur)
-            if nid:
-                lbl_status.configure(text="Servicio creado.", text_color="green")
-                win.after(500, win.destroy)
                 try:
                     self._cargar_servicios()
                     formatted = f"{nid} - {nombre}"
@@ -319,7 +343,7 @@ class AppointmentView(ctk.CTkFrame):
 
         try:
             self.opt_propietarios.configure(values=valores)
-            self.prop_var.set(valores[0])
+            self.prop_var.set("")  # Iniciar vacío
         except Exception:
             pass
 
@@ -377,6 +401,9 @@ class AppointmentView(ctk.CTkFrame):
         win = ctk.CTkToplevel(self)
         win.title("Nuevo Propietario")
         win.geometry("420x380")
+        win.grab_set()  # Make modal
+        win.attributes('-topmost', True)  # Bring to front
+        win.focus_force()  # Give focus
 
         ctk.CTkLabel(win, text="Registrar Cliente", font=("Roboto", 16, "bold")).pack(pady=8)
 
@@ -431,6 +458,9 @@ class AppointmentView(ctk.CTkFrame):
         win = ctk.CTkToplevel(self)
         win.title("Nueva Mascota")
         win.geometry("420x380")
+        win.grab_set()  # Make modal
+        win.attributes('-topmost', True)  # Bring to front
+        win.focus_force()  # Give focus
 
         ctk.CTkLabel(win, text="Registrar Mascota", font=("Roboto", 16, "bold")).pack(pady=8)
 

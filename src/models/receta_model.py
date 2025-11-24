@@ -32,6 +32,29 @@ class RecetaModel:
         finally:
             conn.close()
 
+    @staticmethod
+    def crear(id_diagnostico, id_producto, cantidad):
+        """Crea una nueva receta asociada a un diagnóstico."""
+        conn = get_db_connection()
+        if conn is None:
+            return False
+        
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """INSERT INTO recetas (id_diagnostico, id_producto, cantidad, estado)
+                   VALUES (?, ?, ?, 'Emitida')""",
+                (id_diagnostico, id_producto, cantidad)
+            )
+            conn.commit()
+            return True
+        except Error as e:
+            print(f"Error al crear receta: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+
     def process_dispatch(self, id_receta, id_producto, cantidad_requerida):
         """
         Maneja la transacción para reducir el stock y actualizar el estado de la receta.
