@@ -4,8 +4,8 @@ from tkinter import messagebox
 
 
 class MedicationsView(ctk.CTkFrame):
-    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
-        super().__init__(master, **kwargs)
+    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None):
+        super().__init__(master)
         self.medications_controller = MedicationsController()
         self.pack(fill="both", expand=True)
         self.crear_widgets()
@@ -13,32 +13,70 @@ class MedicationsView(ctk.CTkFrame):
     def crear_widgets(self):
         from models.producto_model import ProductoModel
 
-        self.lbl_titulo = ctk.CTkLabel(
-            self, text="Registrar Medicamento (Inventario)", font=("Roboto", 22, "bold")
+        # Card container
+        self.center_frame = ctk.CTkFrame(
+            self, 
+            fg_color="#2a2a2a",
+            corner_radius=15,
+            border_width=1,
+            border_color="#3a3a3a"
         )
-        self.lbl_titulo.pack(pady=10)
+        self.center_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Title
+        self.lbl_titulo = ctk.CTkLabel(
+            self.center_frame, 
+            text="Registrar Medicamento (Inventario)", 
+            font=("Roboto", 24, "bold"),
+            text_color="#4a9eff"
+        )
+        self.lbl_titulo.pack(pady=(30, 20), padx=40)
 
         # Campos para producto
         self.txt_nombre = ctk.CTkEntry(
-            self, placeholder_text="Nombre del medicamento", width=400
+            self.center_frame, 
+            placeholder_text="Nombre del medicamento", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_nombre.pack(pady=5)
+        self.txt_nombre.pack(pady=8, padx=40)
+        
         self.txt_precio_venta = ctk.CTkEntry(
-            self, placeholder_text="Precio de venta", width=200
+            self.center_frame, 
+            placeholder_text="Precio de venta", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_precio_venta.pack(pady=5)
+        self.txt_precio_venta.pack(pady=8, padx=40)
+        
         self.txt_costo_unitario = ctk.CTkEntry(
-            self, placeholder_text="Costo unitario", width=200
+            self.center_frame, 
+            placeholder_text="Costo unitario", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_costo_unitario.pack(pady=5)
+        self.txt_costo_unitario.pack(pady=8, padx=40)
+        
         self.txt_stock_actual = ctk.CTkEntry(
-            self, placeholder_text="Stock actual", width=200
+            self.center_frame, 
+            placeholder_text="Stock actual", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_stock_actual.pack(pady=5)
+        self.txt_stock_actual.pack(pady=8, padx=40)
+        
         self.txt_fecha_vencimiento = ctk.CTkEntry(
-            self, placeholder_text="Fecha de vencimiento (YYYY-MM-DD)", width=250
+            self.center_frame, 
+            placeholder_text="Fecha de vencimiento (YYYY-MM-DD)", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_fecha_vencimiento.pack(pady=5)
+        self.txt_fecha_vencimiento.pack(pady=8, padx=40)
 
         # Bind Enter key
         self.txt_nombre.bind("<Return>", self.registrar_medicamento)
@@ -48,29 +86,16 @@ class MedicationsView(ctk.CTkFrame):
         self.txt_fecha_vencimiento.bind("<Return>", self.registrar_medicamento)
 
         self.btn_guardar = ctk.CTkButton(
-            self, text="Registrar Medicamento", command=self.registrar_medicamento
+            self.center_frame, 
+            text="Registrar Medicamento", 
+            command=self.registrar_medicamento,
+            height=40,
+            width=450,
+            fg_color="#2a5a8a",
+            hover_color="#3a6a9a",
+            font=("Roboto", 14, "bold")
         )
-        self.btn_guardar.pack(pady=15)
-
-        self.lbl_alerta = ctk.CTkLabel(
-            self, text="", text_color="red", font=("Roboto", 14, "bold")
-        )
-        self.lbl_alerta.pack(pady=5)
-
-        # Mostrar alerta si algún producto tiene stock bajo
-        self.mostrar_alerta_stock_bajo()
-
-    def mostrar_alerta_stock_bajo(self):
-        from models.producto_model import ProductoModel
-
-        productos = ProductoModel.obtener_todos()
-        bajos = [p["nombre"] for p in productos if p["stock_actual"] < 5]
-        if bajos:
-            self.lbl_alerta.configure(
-                text=f"¡Alerta! Stock bajo en: {', '.join(bajos)}"
-            )
-        else:
-            self.lbl_alerta.configure(text="")
+        self.btn_guardar.pack(pady=(20, 35), padx=40)
 
     def registrar_medicamento(self, event=None):
         from models.producto_model import ProductoModel
@@ -89,12 +114,30 @@ class MedicationsView(ctk.CTkFrame):
         ):
             messagebox.showerror("Error", "Todos los campos son obligatorios.")
             return
+        import re
+        if not re.match(r"^[a-zA-Z0-9\s]+$", nombre):
+            messagebox.showerror("Error", "El nombre solo puede contener letras y números.")
+            return
+
         try:
             precio_venta = float(precio_venta)
+            if precio_venta < 0:
+                messagebox.showerror("Error", "El precio de venta no puede ser negativo.")
+                return
             costo_unitario = float(costo_unitario)
+            if costo_unitario < 0:
+                messagebox.showerror("Error", "El costo unitario no puede ser negativo.")
+                return
             stock_actual = int(stock_actual)
+            if stock_actual < 0:
+                messagebox.showerror("Error", "El stock no puede ser negativo.")
+                return
         except ValueError:
-            messagebox.showerror("Error", "Precio, costo y stock deben ser numéricos.")
+            messagebox.showerror("Error", "Precio y costo deben ser números reales, stock entero.")
+            return
+
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", fecha_vencimiento):
+            messagebox.showerror("Error", "Formato de fecha inválido. Use YYYY-MM-DD.")
             return
         try:
             exito = ProductoModel.crear(
@@ -107,7 +150,6 @@ class MedicationsView(ctk.CTkFrame):
                 self.txt_costo_unitario.delete(0, "end")
                 self.txt_stock_actual.delete(0, "end")
                 self.txt_fecha_vencimiento.delete(0, "end")
-                self.mostrar_alerta_stock_bajo()
             else:
                 messagebox.showerror(
                     "Error", "Ocurrió un error al registrar el medicamento."
