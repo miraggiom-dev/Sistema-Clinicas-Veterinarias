@@ -14,7 +14,6 @@ from views.farmaceuta_view import FarmaceutaView
 from controllers.reporte_controller import ReporteController
 from controllers.gestion_precios_controller import GestionPreciosController
 from views.gestion_precios_view import GestionPreciosView
-
 from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
@@ -54,7 +53,6 @@ class MainApp(ctk.CTk):
         super().__init__()
         self.title("Sistema Integrado de Gestión de Clínicas Veterinarias")
         self.geometry("900x600")
-
         self.auth_controller = AuthController() 
         self.farmaceuta_controller = FarmaceutaController()
         self.reporte_controller = ReporteController()
@@ -144,7 +142,6 @@ class MainApp(ctk.CTk):
         else:
             controller_a_usar = self.auth_controller
 
-        # Pasar el controlador correcto
         ViewClass(
             master_frame, 
             controller_a_usar,
@@ -156,7 +153,6 @@ class MainApp(ctk.CTk):
     def cerrar_sesion(self):
         self.auth_controller.logout()
         self.mostrar_login()
-
 
 if __name__ == "__main__":
     

@@ -7,16 +7,15 @@ from models.propietario_model import PropietarioModel
 
 
 class VetHistoryView(ctk.CTkFrame):
-    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
-        super().__init__(master, **kwargs)
-        # Si el controlador es AuthController, podemos obtener el usuario actual
+    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None):
+        super().__init__(master)
+        self.controller = controller
         self.usuario = None
         self.rol = None
         if controller and hasattr(controller, 'usuario_actual'):
              if controller.usuario_actual:
                 self.usuario = controller.usuario_actual.nombre
                 self.rol = controller.usuario_actual.rol
-        
         self.switch_callback = switch_callback
         self.admission_controller = AdmissionController()
         self.historia_model = HistoriaClinicaModel()
@@ -52,12 +51,11 @@ class VetHistoryView(ctk.CTkFrame):
             self.frame_historial, text="Historial Clínico", font=("Arial", 16, "bold")
         )
         self.label_historial.pack(pady=5)
-
-        self.text_historial = ctk.CTkTextbox(
+        
+        self.scroll_historial = ctk.CTkScrollableFrame(
             self.frame_historial, width=500, height=400
         )
-        self.text_historial.pack(fill="both", expand=True)
-        self.text_historial.configure(state="disabled")
+        self.scroll_historial.pack(fill="both", expand=True)
 
         self.cargar_mascotas()
 
@@ -80,16 +78,192 @@ class VetHistoryView(ctk.CTkFrame):
     def mostrar_historial(self, mascota):
         self.mascota_seleccionada = mascota
         historial = self.historia_model.obtener_por_mascota(mascota["id_mascota"])
-        self.text_historial.configure(state="normal")
-        self.text_historial.delete("1.0", "end")
+        
+        for widget in self.scroll_historial.winfo_children():
+            widget.destroy()
+
         if historial:
             for entry in historial:
-                self.text_historial.insert(
-                    "end",
-                    f"Fecha: {entry['fecha']}\nDiagnóstico: {entry['diagnostico']}\nTratamiento: {entry['tratamiento']}\n---\n",
-                )
+                self.crear_tarjeta_historial(entry)
         else:
-            self.text_historial.insert(
-                "end", "No hay historial clínico para esta mascota."
+            lbl = ctk.CTkLabel(
+                self.scroll_historial, text="No hay historial clínico para esta mascota."
             )
-        self.text_historial.configure(state="disabled")
+            lbl.pack(pady=20)
+
+    def crear_tarjeta_historial(self, entry):
+        card = ctk.CTkFrame(self.scroll_historial, fg_color="#2b2b2b")
+        card.pack(fill="x", pady=5, padx=5)
+
+        # Header: Version (Left) - Date (Right)
+        header = ctk.CTkFrame(card, fg_color="transparent")
+        header.pack(fill="x", padx=10, pady=5)
+        
+        # Version and Status
+        version_text = f"Versión {entry['version']}"
+        if entry['es_actual']:
+            version_text += " (ACTUAL)"
+            color_version = "green"
+        else:
+            version_text += " (HISTÓRICO)"
+            color_version = "gray"
+
+        ctk.CTkLabel(header, text=version_text, font=("Roboto", 12, "bold"), text_color=color_version).pack(side="left", anchor="n")
+        
+        # Date (Right)
+        ctk.CTkLabel(header, text=f"{entry['fecha']}", font=("Roboto", 12)).pack(side="right", anchor="n")
+
+        # Content
+        content = ctk.CTkFrame(card, fg_color="transparent")
+        content.pack(fill="x", padx=10, pady=5)
+
+        # Veterinario
+        ctk.CTkLabel(content, text="Veterinario:", font=("Roboto", 12, "bold")).pack(anchor="w")
+        ctk.CTkLabel(content, text=entry['veterinario'], wraplength=400, justify="left").pack(anchor="w", pady=(0, 5))
+
+        # Diagnostico
+        ctk.CTkLabel(content, text="Diagnóstico:", font=("Roboto", 12, "bold")).pack(anchor="w")
+        ctk.CTkLabel(content, text=entry['diagnostico'], wraplength=400, justify="left").pack(anchor="w", pady=(0, 5))
+
+        # Tratamiento
+        ctk.CTkLabel(content, text="Tratamiento:", font=("Roboto", 12, "bold")).pack(anchor="w")
+        ctk.CTkLabel(content, text=entry['tratamiento'], wraplength=400, justify="left").pack(anchor="w", pady=(0, 5))
+
+        # Observacion
+        if entry['observacion_edicion']:
+            ctk.CTkLabel(content, text="Observación:", font=("Roboto", 12, "bold")).pack(anchor="w")
+            ctk.CTkLabel(content, text=entry['observacion_edicion'], wraplength=400, justify="left").pack(anchor="w")
+
+        # Edit Button (Only for Veterinarians and Current Version)
+        # Debug print
+        # print(f"DEBUG: Rol actual: '{self.rol}'")
+        
+        if self.rol and self.rol.strip().lower() == "veterinario" and entry['es_actual']:
+            btn_edit = ctk.CTkButton(
+                card, 
+                text="Editar Diagnóstico", 
+                height=30,
+                fg_color="red", # Changed to red
+                hover_color="darkred",
+                text_color="white",
+                command=lambda e=entry: self.editar_diagnostico(e)
+            )
+            btn_edit.pack(pady=10, padx=10, anchor="e")
+
+    def editar_diagnostico(self, entry):
+        from datetime import datetime
+        from controllers.diagnosis_controller import DiagnosisController
+        from models.usuario_model import UsuarioModel
+        from tkinter import messagebox
+
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Editar Diagnóstico")
+        dialog.geometry("500x550")
+        dialog.grab_set()
+
+        ctk.CTkLabel(dialog, text="Editar Diagnóstico", font=("Roboto", 18, "bold")).pack(pady=10)
+
+        ctk.CTkLabel(dialog, text="Diagnóstico:").pack(anchor="w", padx=20)
+        txt_diag = ctk.CTkEntry(dialog, width=400)
+        txt_diag.pack(pady=5, padx=20)
+        txt_diag.insert(0, entry['diagnostico'])
+
+        ctk.CTkLabel(dialog, text="Tratamiento:").pack(anchor="w", padx=20, pady=(10, 0))
+        txt_trat = ctk.CTkEntry(dialog, width=400)
+        txt_trat.pack(pady=5, padx=20)
+        txt_trat.insert(0, entry['tratamiento'])
+
+        # Separator
+        ctk.CTkLabel(dialog, text="", height=10).pack()
+        ctk.CTkLabel(
+            dialog, 
+            text="Para confirmar los cambios, ingrese su contraseña:", 
+            font=("Roboto", 12, "bold"),
+            text_color="#4a9eff"
+        ).pack(pady=(10, 5))
+
+        ctk.CTkLabel(dialog, text="Contraseña:").pack(anchor="w", padx=20)
+        txt_password = ctk.CTkEntry(dialog, width=400, show="*")
+        txt_password.pack(pady=5, padx=20)
+
+        lbl_error = ctk.CTkLabel(dialog, text="", text_color="red")
+        lbl_error.pack(pady=5)
+
+        def guardar_cambios():
+            nuevo_diag = txt_diag.get().strip()
+            nuevo_trat = txt_trat.get().strip()
+            password = txt_password.get().strip()
+            
+            if not nuevo_diag or not nuevo_trat:
+                lbl_error.configure(text="Diagnóstico y tratamiento son obligatorios")
+                return
+
+            if not password:
+                lbl_error.configure(text="Debe ingresar su contraseña para firmar")
+                return
+
+            # Obtener el usuario actual del controller si está disponible
+            id_veterinario_actual = None
+            email_veterinario = None
+            
+            # Intentar obtener del controller
+            if hasattr(self, 'controller') and self.controller and hasattr(self.controller, 'usuario_actual'):
+                if self.controller.usuario_actual:
+                    id_veterinario_actual = self.controller.usuario_actual.id_usuario
+                    email_veterinario = self.controller.usuario_actual.email
+
+            # Si no tenemos el email del controller, necesitamos buscarlo por nombre
+            # Esto es un fallback, idealmente siempre deberíamos tener el controller
+            if not email_veterinario:
+                # Buscar el usuario por nombre en la base de datos
+                usuarios = UsuarioModel.obtener_todos()
+                for user in usuarios:
+                    if user['nombre_completo'] == self.usuario:
+                        email_veterinario = user['email']
+                        id_veterinario_actual = user['id_usuario']
+                        break
+
+            if not email_veterinario:
+                lbl_error.configure(text="Error: No se pudo verificar el usuario actual")
+                return
+
+            # Verificar contraseña
+            usuario_verificado = UsuarioModel.autenticar(email_veterinario, password)
+            
+            if not usuario_verificado:
+                lbl_error.configure(text="Contraseña incorrecta")
+                return
+
+            # Contraseña correcta, proceder a guardar
+            fecha_actual = datetime.now().strftime("%Y-%m-%d")
+            observacion = f"Editado por: {self.usuario}, {fecha_actual}"
+            
+            # La firma será el nombre completo del veterinario que está editando
+            firma = self.usuario
+
+            # Guardar con el ID del veterinario actual (quien está editando)
+            exito = DiagnosisController.registrar_diagnostico(
+                entry['id_cita'],
+                id_veterinario_actual,  # ID del veterinario que está editando
+                nuevo_diag,
+                nuevo_trat,
+                observacion,
+                firma=firma  # Firma con el nombre del veterinario actual
+            )
+
+            if exito:
+                messagebox.showinfo("Éxito", "Diagnóstico actualizado y firmado correctamente")
+                dialog.destroy()
+                self.mostrar_historial(self.mascota_seleccionada)
+            else:
+                lbl_error.configure(text="Error al guardar el diagnóstico")
+
+        ctk.CTkButton(
+            dialog, 
+            text="Guardar Cambios", 
+            command=guardar_cambios,
+            height=35,
+            fg_color="#2a5a8a",
+            hover_color="#3a6a9a",
+            font=("Roboto", 13, "bold")
+        ).pack(pady=20)
