@@ -4,7 +4,7 @@ class ServicioModel:
     """Modelo para operaciones CRUD sobre la tabla `servicios`.
 
     Métodos:
-    - crear(nombre, precio_base, costo_mano_obra, duracion_estimada)
+    - crear(nombre, tipo, precio_base, costo_mano_obra, duracion_estimada)
     - obtener_todos(activos_only=True)
     - obtener_por_id(id_servicio)
     - actualizar(id_servicio, **kwargs)
@@ -13,16 +13,16 @@ class ServicioModel:
     """
 
     @staticmethod
-    def crear(nombre, precio_base=0.0, costo_mano_obra=0.0, duracion_estimada=30):
+    def crear(nombre, tipo, precio_base=0.0, costo_mano_obra=0.0, duracion_estimada=30):
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
             cursor.execute(
                 """
-                INSERT INTO servicios (nombre, precio_base, costo_mano_obra, duracion_estimada, activo)
-                VALUES (?, ?, ?, ?, 1)
+                INSERT INTO servicios (nombre, tipo, precio_base, costo_mano_obra, duracion_estimada, activo)
+                VALUES (?, ?, ?, ?, ?, 1)
                 """,
-                (nombre, precio_base, costo_mano_obra, duracion_estimada),
+                (nombre, tipo, precio_base, costo_mano_obra, duracion_estimada),
             )
             conn.commit()
             return cursor.lastrowid
@@ -64,16 +64,16 @@ class ServicioModel:
             conn.close()
 
     @staticmethod
-    def actualizar(id_servicio, nombre=None, precio_base=None, costo_mano_obra=None, duracion_estimada=None, activo=None):
-        """Actualiza los campos proporcionados para el servicio indicado.
-
-        Retorna True si se actualizó correctamente, False en caso contrario.
-        """
+    def actualizar(id_servicio, nombre=None, tipo=None, precio_base=None, costo_mano_obra=None, duracion_estimada=None, activo=None):
+        """Actualiza los campos proporcionados para el servicio indicado."""
         fields = []
         params = []
         if nombre is not None:
             fields.append("nombre = ?")
             params.append(nombre)
+        if tipo is not None:
+            fields.append("tipo = ?")
+            params.append(tipo)
         if precio_base is not None:
             fields.append("precio_base = ?")
             params.append(precio_base)
@@ -88,7 +88,6 @@ class ServicioModel:
             params.append(1 if bool(activo) else 0)
 
         if not fields:
-            # nada que actualizar
             return False
 
         params.append(id_servicio)

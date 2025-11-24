@@ -1,0 +1,2 @@
+ID Cita	Fecha	Servicio	Precio	Propietario
+1	2025-11-24 16:30:00	Lobotomia	1000000.0	David Moreno

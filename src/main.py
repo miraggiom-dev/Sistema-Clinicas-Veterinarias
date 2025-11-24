@@ -11,12 +11,10 @@ from database.schema_setup import create_tables
 from controllers.auth_controller import AuthController 
 from controllers.farmaceuta_controller import FarmaceutaController 
 from views.farmaceuta_view import FarmaceutaView 
-from controllers.reporte_controller import ReporteController
 from controllers.gestion_precios_controller import GestionPreciosController
 from views.gestion_precios_view import GestionPreciosView
 from controllers.service_controller import ServiceController
 from views.service_view import ServiceView
-
 from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
@@ -28,7 +26,7 @@ from views.appointment_view import AppointmentView
 
 # --- Vistas de ejemplo ---
 
-from views.reporte_view import ReporteView
+# --- Vistas de ejemplo ---
         
 # --- MAPEO DE VISTAS ---
 
@@ -36,7 +34,6 @@ VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
     "VetHistoryView": VetHistoryView,
-    "ReportsView": ReporteView,
     "FarmaceutaView": FarmaceutaView,
     "DiagnosisView": DiagnosisView,
     "TreatmentView": TreatmentView,
@@ -57,10 +54,8 @@ class MainApp(ctk.CTk):
         super().__init__()
         self.title("Sistema Integrado de Gestión de Clínicas Veterinarias")
         self.geometry("900x600")
-
         self.auth_controller = AuthController() 
         self.farmaceuta_controller = FarmaceutaController()
-        self.reporte_controller = ReporteController()
         self.gestion_precios_controller = GestionPreciosController()
         self.historial_diagnostico_controller = HistorialDiagnosticoController()
         from controllers.users_controller import UsersController
@@ -108,7 +103,7 @@ class MainApp(ctk.CTk):
         elif rol == "Veterinario":
             return "VetHistoryView"
         elif rol == "Administrador":
-            return "ReportsView"
+            return "UsersView"
         elif rol == "Farmacéutico":
             return "FarmaceutaView"
         return None
@@ -137,8 +132,6 @@ class MainApp(ctk.CTk):
         # Determinar el controlador a usar basado en el módulo
         if module_key == "FarmaceutaView":
             controller_a_usar = self.farmaceuta_controller
-        elif module_key == "ReportsView":
-            controller_a_usar = self.reporte_controller
         elif module_key == "GestionPreciosView":
             controller_a_usar = self.gestion_precios_controller
         elif module_key == "HistorialDiagnosticoView":
@@ -150,7 +143,6 @@ class MainApp(ctk.CTk):
         else:
             controller_a_usar = self.auth_controller
 
-        # Pasar el controlador correcto
         ViewClass(
             master_frame, 
             controller_a_usar,
@@ -162,7 +154,6 @@ class MainApp(ctk.CTk):
     def cerrar_sesion(self):
         self.auth_controller.logout()
         self.mostrar_login()
-
 
 if __name__ == "__main__":
     

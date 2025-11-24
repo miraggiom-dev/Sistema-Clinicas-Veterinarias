@@ -8,7 +8,7 @@ class ServiceController:
         """Obtiene todos los servicios."""
         return ServicioModel.obtener_todos(activos_only=activos_only)
 
-    def crear_servicio(self, nombre, precio_base, costo_mano_obra, duracion_estimada):
+    def crear_servicio(self, nombre, tipo, precio_base, costo_mano_obra, duracion_estimada):
         """Crea un nuevo servicio."""
         try:
             precio_base = float(precio_base)
@@ -25,9 +25,9 @@ class ServiceController:
         except ValueError:
             duracion_estimada = 30
 
-        return ServicioModel.crear(nombre, precio_base, costo_mano_obra, duracion_estimada)
+        return ServicioModel.crear(nombre, tipo, precio_base, costo_mano_obra, duracion_estimada)
 
-    def actualizar_servicio(self, id_servicio, nombre, precio_base, costo_mano_obra, duracion_estimada, activo=True):
+    def actualizar_servicio(self, id_servicio, nombre, tipo, precio_base, costo_mano_obra, duracion_estimada, activo=True):
         """Actualiza un servicio existente."""
         try:
             precio_base = float(precio_base)
@@ -47,6 +47,7 @@ class ServiceController:
         return ServicioModel.actualizar(
             id_servicio, 
             nombre=nombre, 
+            tipo=tipo,
             precio_base=precio_base, 
             costo_mano_obra=costo_mano_obra, 
             duracion_estimada=duracion_estimada,
