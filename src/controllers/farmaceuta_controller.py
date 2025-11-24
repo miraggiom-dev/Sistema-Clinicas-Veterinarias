@@ -2,10 +2,30 @@
 
 from models.farmaceuta_model import FarmaceutaModel
 
+
 class FarmaceutaController:
-    
     def __init__(self):
-        self.modelo = FarmaceutaModel() 
+        self.modelo = FarmaceutaModel()
+
+    def registrar_producto(self, nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento):
+        """
+        Registra un nuevo producto en el inventario.
+        """
+        try:
+            precio_venta = float(precio_venta)
+            costo_unitario = float(costo_unitario)
+            stock_actual = int(stock_actual)
+            stock_minimo = int(stock_minimo)
+        except ValueError:
+            return False, "Error: Verifique los datos numéricos."
+
+        if not nombre or precio_venta < 0 or costo_unitario < 0 or stock_actual < 0 or stock_minimo < 0 or not fecha_vencimiento:
+            return False, "Error: Complete todos los campos correctamente."
+
+        exito = self.modelo.producto_model.add_product(
+            nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento
+        )
+        return (exito, "Producto registrado exitosamente." if exito else "Error al registrar el producto.")
 
     def obtener_recetas_pendientes(self):
         """Obtiene la lista de recetas médicas pendientes."""

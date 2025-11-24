@@ -1,6 +1,28 @@
 from database.connection import get_db_connection
 
+
 class UsuarioModel:
+    @staticmethod
+    def crear(nombre, rol, email, password):
+        """Crea un nuevo usuario con rol, email y password."""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                """
+                INSERT INTO usuarios (nombre_completo, rol, email, password, estado)
+                VALUES (?, ?, ?, ?, 1)
+                """,
+                (nombre, rol, email, password)
+            )
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error creando usuario: {e}")
+            return False
+        finally:
+            conn.close()
+
     def __init__(self, id_usuario=None, nombre=None, rol=None, email=None, password=None):
         self.id_usuario = id_usuario
         self.nombre = nombre
