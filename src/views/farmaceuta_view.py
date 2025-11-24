@@ -85,10 +85,62 @@ class FarmaceutaView(ctk.CTkFrame):
             text="Agregar Nuevo Producto",
             command=self._abrir_modal_agregar_producto
         ).pack(pady=5)
-        ctk.CTkButton(self.tab_inventario, text="Ver/Editar Inventario").pack(pady=5)
-        ctk.CTkLabel(
-            self.tab_inventario, text="[Aquí irá la tabla de inventario con filtros]"
-        ).pack(pady=10)
+        ctk.CTkButton(
+            self.tab_inventario,
+            text="Ver/Editar Inventario",
+            command=self._mostrar_tabla_inventario
+        ).pack(pady=5)
+
+        self.frame_tabla_inventario = ctk.CTkFrame(self.tab_inventario)
+        self.frame_tabla_inventario.pack(pady=10, fill="x")
+        # Mostrar la tabla de inventario automáticamente al cargar la pestaña
+        self._mostrar_tabla_inventario()
+
+    def _mostrar_tabla_inventario(self):
+        # Limpiar el frame de la tabla
+        for widget in self.frame_tabla_inventario.winfo_children():
+            widget.destroy()
+        # Obtener productos
+        productos = self.controller.modelo.producto_model.get_all_products()
+        headers = ["ID", "Nombre", "Stock", "Stock Mínimo", "Precio Venta", "Costo Unitario", "Vencimiento", "Acción"]
+        for col, h in enumerate(headers):
+            ctk.CTkLabel(self.frame_tabla_inventario, text=h, font=("Roboto", 12, "bold")).grid(row=0, column=col, padx=5, pady=2)
+        self._inventario_entries = {}
+        for i, prod in enumerate(productos, start=1):
+            row_entries = {}
+            ctk.CTkLabel(self.frame_tabla_inventario, text=str(prod[0])).grid(row=i, column=0, padx=5, pady=2)  # ID
+            ctk.CTkLabel(self.frame_tabla_inventario, text=str(prod[1])).grid(row=i, column=1, padx=5, pady=2)  # Nombre
+            # Editable fields
+            for j, field in zip(range(2, 7), ["stock_actual", "stock_minimo", "precio_venta", "costo_unitario", "fecha_vencimiento"]):
+                entry = ctk.CTkEntry(self.frame_tabla_inventario, width=80)
+                entry.insert(0, str(prod[j]))
+                entry.grid(row=i, column=j, padx=5, pady=2)
+                row_entries[field] = entry
+            # Botón guardar
+            btn = ctk.CTkButton(self.frame_tabla_inventario, text="Guardar", width=70,
+                command=lambda pid=prod[0], e=row_entries: self._guardar_edicion_producto(pid, e))
+            btn.grid(row=i, column=7, padx=5, pady=2)
+            self._inventario_entries[prod[0]] = row_entries
+
+    def _guardar_edicion_producto(self, id_producto, entries):
+        # Obtener valores editados
+        try:
+            stock_actual = int(entries["stock_actual"].get())
+            stock_minimo = int(entries["stock_minimo"].get())
+            precio_venta = float(entries["precio_venta"].get())
+            costo_unitario = float(entries["costo_unitario"].get())
+            fecha_vencimiento = entries["fecha_vencimiento"].get()
+        except Exception:
+            ctk.CTkMessagebox(title="Error", message="Verifica los datos ingresados.", icon="cancel")
+            return
+        exito = self.controller.modelo.producto_model.actualizar_producto(
+            id_producto, stock_actual, stock_minimo, precio_venta, costo_unitario, fecha_vencimiento
+        )
+        if exito:
+            ctk.CTkMessagebox(title="Éxito", message="Producto actualizado.", icon="check")
+            self._mostrar_tabla_inventario()
+        else:
+            ctk.CTkMessagebox(title="Error", message="No se pudo actualizar el producto.", icon="cancel")
 
     def _abrir_modal_agregar_producto(self):
         modal = ctk.CTkToplevel(self)
@@ -187,7 +239,7 @@ class FarmaceutaView(ctk.CTkFrame):
             command=self._manejar_registro_venta,
         )
         btn_venta.pack(pady=10)
-        self.lbl_estado_venta = ctk.CTkLabel(self.tab_ventas, text="")
+        self.lbl_estado_venta = ctk.CTkLabel(self.tab_ventas, text="", text_color="white")
         self.lbl_estado_venta.pack(pady=5)
 
     def _obtener_id_seleccionado(self, valor_combo_seleccionado):
@@ -236,17 +288,16 @@ class FarmaceutaView(ctk.CTkFrame):
         id_producto_combo = self.combo_id_prod.get()
         id_producto = self._obtener_id_seleccionado(id_producto_combo)
 
-        if id_producto is None:
+        if id_producto is None or id_producto == "" or id_producto == 0:
             self.lbl_estado_venta.configure(
-                text="Error: Seleccione un producto de la lista.", text_color="red"
+                text="Error: Seleccione un producto válido de la lista.", text_color="red"
             )
             return
 
-        try:
-            cantidad = self.entrada_cantidad.get()
-        except Exception:
+        cantidad = self.entrada_cantidad.get()
+        if not cantidad.isdigit() or int(cantidad) <= 0:
             self.lbl_estado_venta.configure(
-                text="Error al obtener datos de entrada.", text_color="red"
+                text="Ingrese una cantidad válida (mayor a 0).", text_color="red"
             )
             return
 

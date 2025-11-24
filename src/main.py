@@ -26,14 +26,7 @@ from views.appointment_view import AppointmentView
 
 # --- Vistas de ejemplo ---
 
-class ReportsView(ctk.CTkFrame):
-    # La firma del init debe ser explícita.
-    def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
-        super().__init__(master, **kwargs)
-        self.controller = controller
-        ctk.CTkLabel(
-            self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
-        ).pack(expand=True)
+from views.reporte_view import ReporteView
         
 # --- MAPEO DE VISTAS ---
 
@@ -41,11 +34,13 @@ VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
     "VetHistoryView": VetHistoryView,
-    "ReportsView": ReportsView,
-    "FarmaceutaView": FarmaceutaView, # Clave sin tilde
+    "ReportsView": ReporteView,
+    "FarmaceutaView": FarmaceutaView,
     "DiagnosisView": DiagnosisView,
     "TreatmentView": TreatmentView,
     "MedicationsView": MedicationsView,
+    "UsersView": UsersView,
+    "GestionPreciosView": GestionPreciosView,
 }
 
 
