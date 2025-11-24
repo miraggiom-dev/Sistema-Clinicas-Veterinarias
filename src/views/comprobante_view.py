@@ -11,6 +11,13 @@ class ComprobanteView(ctk.CTkToplevel):
         super().__init__(master)
         self.title("Generar Comprobante")
         self.geometry("420x220")
+        self.attributes('-topmost', True)
+        self.focus_force()
+        if master:
+            try:
+                self.transient(master)
+            except Exception:
+                pass
         try:
             frame_bg = ctk.ThemeManager.theme["CTkFrame"]["fg_color"]
         except Exception:
@@ -22,7 +29,6 @@ class ComprobanteView(ctk.CTkToplevel):
         ctk.CTkLabel(container, text="Generar comprobante de cita", font=("Roboto", 16, "bold")).pack(pady=6)
 
         ctk.CTkLabel(container, text="Seleccione la cita:").pack(anchor="w", pady=(8,2))
-        # OptionMenu con las citas no canceladas
         self._map_label_to_id = {}
         self._citas_labels = []
         self.opt_citas = ctk.CTkOptionMenu(container, values=self._citas_labels, width=300)

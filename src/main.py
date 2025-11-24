@@ -18,32 +18,34 @@ from views.gestion_precios_view import GestionPreciosView
 from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
+from views.vet_history_view import VetHistoryView
+from views.diagnosis_view import DiagnosisView
+from views.treatment_view import TreatmentView
+from views.medications_view import MedicationsView
 from views.appointment_view import AppointmentView
 
 # --- Vistas de ejemplo ---
 
-class HistoryView(ctk.CTkFrame):
-    # La firma del init debe ser explícita para consumir todos los argumentos.
+class ReportsView(ctk.CTkFrame):
+    # La firma del init debe ser explícita.
     def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
-        super().__init__(master, **kwargs) # Solo pasamos master y **kwargs al padre
+        super().__init__(master, **kwargs)
         self.controller = controller
-        ctk.CTkLabel(self, text="MÓDULO DE HISTORIAL CLÍNICO PENDIENTE", font=("Roboto", 30)).pack(expand=True)
-
-
-# Usar la vista funcional de reportes
-from views.reporte_view import ReporteView as ReportsView
+        ctk.CTkLabel(
+            self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
+        ).pack(expand=True)
         
 # --- MAPEO DE VISTAS ---
 
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
     "AppointmentView": AppointmentView,
-    "HistoryView": HistoryView,
+    "VetHistoryView": VetHistoryView,
     "ReportsView": ReportsView,
-    "GestionPreciosView": GestionPreciosView,
-    "FarmaceutaView": FarmaceutaView,
-    "HistorialDiagnosticoView": HistorialDiagnosticoView,
-    "UsersView": UsersView,
+    "FarmaceutaView": FarmaceutaView, # Clave sin tilde
+    "DiagnosisView": DiagnosisView,
+    "TreatmentView": TreatmentView,
+    "MedicationsView": MedicationsView,
 }
 
 
@@ -105,7 +107,7 @@ class MainApp(ctk.CTk):
         if rol == "Recepcionista":
             return "AdmissionView"
         elif rol == "Veterinario":
-            return "HistoryView"
+            return "VetHistoryView"
         elif rol == "Administrador":
             return "ReportsView"
         elif rol == "Farmacéutico":
@@ -155,7 +157,6 @@ class MainApp(ctk.CTk):
             active_tab, 
             self.cambiar_modulo_principal
         ).pack(fill="both", expand=True)
-
 
     def cerrar_sesion(self):
         self.auth_controller.logout()
