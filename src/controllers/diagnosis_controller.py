@@ -6,11 +6,11 @@ from models.usuario_model import UsuarioModel
 class DiagnosisController:
     @staticmethod
     def registrar_diagnostico(
-        id_cita, id_veterinario, diagnostico, tratamiento, observacion=""
+        id_cita, id_veterinario, diagnostico, tratamiento, observacion="", firma=None
     ):
         # Para compatibilidad, sin firma
         return DiagnosticoModel.guardar_diagnostico(
-            id_cita, id_veterinario, diagnostico, tratamiento, observacion
+            id_cita, id_veterinario, diagnostico, tratamiento, observacion, firma
         )
 
     @staticmethod
