@@ -4,12 +4,17 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from database.schema_setup import create_tables 
-from controllers.auth_controller import AuthController 
-from controllers.farmaceuta_controller import FarmaceutaController 
+from controllers.historial_diagnostico_controller import HistorialDiagnosticoController
+from views.historial_diagnostico_view import HistorialDiagnosticoView
+from controllers.reporte_controller import ReporteController
+from controllers.gestion_precios_controller import GestionPreciosController
 
-from views.farmaceuta_view import FarmaceutaView 
-from views.login_view import LoginView 
+from database.schema_setup import create_tables
+from controllers.auth_controller import AuthController
+from controllers.farmaceuta_controller import FarmaceutaController
+from views.gestion_precios_view import GestionPreciosView
+from views.farmaceuta_view import FarmaceutaView
+from views.login_view import LoginView
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
 from views.vet_history_view import VetHistoryView
@@ -23,13 +28,22 @@ from views.alerts_view import AlertsView
 
 class ReportsView(ctk.CTkFrame):
 
-    def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
+    def __init__(
+        self,
+        master,
+        controller,
+        id_mascota=None,
+        active_tab=None,
+        switch_module_callback=None,
+        **kwargs,
+    ):
         super().__init__(master, **kwargs)
         self.controller = controller
         ctk.CTkLabel(
             self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
         ).pack(expand=True)
-        
+
+
 # --- MAPEO DE VISTAS ---
 
 VIEW_MAP = {
@@ -43,6 +57,7 @@ VIEW_MAP = {
     "DiagnosisView": DiagnosisView,
     "TreatmentView": TreatmentView,
     "MedicationsView": MedicationsView,
+    "GestionPreciosView": GestionPreciosView,
 }
 
 
@@ -56,9 +71,15 @@ class MainApp(ctk.CTk):
         self.title("Sistema Integrado de Gestión de Clínicas Veterinarias")
         self.geometry("900x600")
 
-        self.auth_controller = AuthController() 
+        self.auth_controller = AuthController()
         self.farmaceuta_controller = FarmaceutaController()
         self.dashboard_view = None
+        self.reporte_controller = ReporteController()
+        self.gestion_precios_controller = GestionPreciosController()
+        self.historial_diagnostico_controller = HistorialDiagnosticoController()
+        from controllers.users_controller import UsersController
+
+        self.users_controller = UsersController()
 
         self.mostrar_login()
 
@@ -103,9 +124,8 @@ class MainApp(ctk.CTk):
         elif rol == "Administrador":
             return "ReportsView"
         elif rol == "Farmacéutico":
-            return "FarmaceutaView" 
+            return "FarmaceutaView"
         return None
-
 
     def cambiar_modulo_principal(self, module_key, id_mascota=None, active_tab=None):
         """
@@ -123,18 +143,26 @@ class MainApp(ctk.CTk):
 
         for widget in master_frame.winfo_children():
             widget.destroy()
-            
+
         if module_key == "FarmaceutaView":
             controller_a_usar = self.farmaceuta_controller
+        elif module_key == "ReportsView":
+            controller_a_usar = self.reporte_controller
+        elif module_key == "GestionPreciosView":
+            controller_a_usar = self.gestion_precios_controller
+        elif module_key == "HistorialDiagnosticoView":
+            controller_a_usar = self.historial_diagnostico_controller
+        elif module_key == "UsersView":
+            controller_a_usar = self.users_controller
         else:
             controller_a_usar = self.auth_controller
 
         ViewClass(
-            master_frame, 
+            master_frame,
             controller_a_usar,
-            id_mascota, 
-            active_tab, 
-            self.cambiar_modulo_principal
+            id_mascota,
+            active_tab,
+            self.cambiar_modulo_principal,
         ).pack(fill="both", expand=True)
 
     def cerrar_sesion(self):
@@ -143,12 +171,15 @@ class MainApp(ctk.CTk):
 
 
 if __name__ == "__main__":
-    
+
     try:
         from database.schema_setup import create_tables
+
         create_tables()
     except ImportError:
-        print("Advertencia: No se encontró database/schema_setup.py. Continuando sin inicialización de DB.")
+        print(
+            "Advertencia: No se encontró database/schema_setup.py. Continuando sin inicialización de DB."
+        )
 
     app = MainApp()
     app.mainloop()

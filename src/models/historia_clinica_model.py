@@ -10,12 +10,12 @@ class HistoriaClinicaModel:
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
-            SELECT d.fecha_registro as fecha, d.diagnostico, d.tratamiento, d.observacion_edicion, u.nombre_completo as veterinario
+            SELECT d.id_cita, d.id_veterinario, d.fecha_registro as fecha, d.diagnostico, d.tratamiento, d.observacion_edicion, u.nombre_completo as veterinario, d.version, d.es_actual, d.firma
             FROM diagnosticos d
             JOIN citas c ON d.id_cita = c.id_cita
             JOIN usuarios u ON d.id_veterinario = u.id_usuario
             WHERE c.id_mascota = ?
-            ORDER BY d.fecha_registro DESC
+            ORDER BY d.fecha_registro DESC, d.version DESC
         """
         cursor.execute(query, (id_mascota,))
         rows = cursor.fetchall()

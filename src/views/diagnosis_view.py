@@ -5,8 +5,8 @@ from tkinter import messagebox
 
 
 class DiagnosisView(ctk.CTkFrame):
-    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
-        super().__init__(master, **kwargs)
+    def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None):
+        super().__init__(master)
         self.admission_controller = AdmissionController()
         self.diagnosis_controller = DiagnosisController()
         self.pack(fill="both", expand=True)
@@ -15,10 +15,24 @@ class DiagnosisView(ctk.CTkFrame):
     def crear_widgets(self):
         from models.mascota_model import MascotaModel
 
-        self.lbl_titulo = ctk.CTkLabel(
-            self, text="Registro de Diagnóstico", font=("Roboto", 22, "bold")
+        # Card container
+        self.center_frame = ctk.CTkFrame(
+            self, 
+            fg_color="#2a2a2a",
+            corner_radius=15,
+            border_width=1,
+            border_color="#3a3a3a"
         )
-        self.lbl_titulo.pack(pady=10)
+        self.center_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Title
+        self.lbl_titulo = ctk.CTkLabel(
+            self.center_frame, 
+            text="Registro de Diagnóstico", 
+            font=("Roboto", 24, "bold"),
+            text_color="#4a9eff"
+        )
+        self.lbl_titulo.pack(pady=(30, 20), padx=40)
 
         # Obtener todas las mascotas con propietario
         self.mascotas = MascotaModel.obtener_todas_con_propietario()
@@ -26,33 +40,58 @@ class DiagnosisView(ctk.CTkFrame):
             f"{m['nombre']} (Dueño: {m['propietario_nombre']})": m
             for m in self.mascotas
         }
+        
+        # Label for combobox
+        ctk.CTkLabel(
+            self.center_frame,
+            text="Seleccionar Mascota:",
+            font=("Roboto", 12),
+            text_color="#aaaaaa"
+        ).pack(anchor="w", padx=40, pady=(10, 5))
+        
         self.cmb_mascota = ctk.CTkComboBox(
-            self, values=list(self.mascota_map.keys()), width=300, state="readonly"
+            self.center_frame, 
+            values=list(self.mascota_map.keys()), 
+            width=450, 
+            height=35,
+            state="readonly",
+            font=("Roboto", 12)
         )
-        self.cmb_mascota.pack(pady=10)
+        self.cmb_mascota.pack(pady=(0, 15), padx=40)
 
         self.txt_diagnostico = ctk.CTkEntry(
-            self, placeholder_text="Diagnóstico", width=400
+            self.center_frame, 
+            placeholder_text="Diagnóstico", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_diagnostico.pack(pady=5)
+        self.txt_diagnostico.pack(pady=8, padx=40)
+        
         self.txt_tratamiento = ctk.CTkEntry(
-            self, placeholder_text="Tratamiento", width=400
+            self.center_frame, 
+            placeholder_text="Tratamiento", 
+            width=450,
+            height=35,
+            font=("Roboto", 12)
         )
-        self.txt_tratamiento.pack(pady=5)
-        self.txt_observacion = ctk.CTkEntry(
-            self, placeholder_text="Observación (opcional)", width=400
-        )
-        self.txt_observacion.pack(pady=5)
+        self.txt_tratamiento.pack(pady=8, padx=40)
 
         # Bind Enter key
         self.txt_diagnostico.bind("<Return>", self.registrar_diagnostico)
         self.txt_tratamiento.bind("<Return>", self.registrar_diagnostico)
-        self.txt_observacion.bind("<Return>", self.registrar_diagnostico)
 
         self.btn_guardar = ctk.CTkButton(
-            self, text="Registrar Diagnóstico", command=self.registrar_diagnostico
+            self.center_frame, 
+            text="Registrar Diagnóstico", 
+            command=self.registrar_diagnostico,
+            height=40,
+            width=450,
+            fg_color="#2a5a8a",
+            hover_color="#3a6a9a",
+            font=("Roboto", 14, "bold")
         )
-        self.btn_guardar.pack(pady=15)
+        self.btn_guardar.pack(pady=(20, 35), padx=40)
 
     def registrar_diagnostico(self, event=None):
         from models.cita_model import CitaModel
@@ -83,7 +122,6 @@ class DiagnosisView(ctk.CTkFrame):
 
         diagnostico = self.txt_diagnostico.get().strip()
         tratamiento = self.txt_tratamiento.get().strip()
-        observacion = self.txt_observacion.get().strip()
 
         if not diagnostico or not tratamiento:
             messagebox.showerror("Error", "Debe ingresar diagnóstico y tratamiento.")
@@ -148,7 +186,7 @@ class DiagnosisView(ctk.CTkFrame):
                         id_veterinario,
                         diagnostico,
                         tratamiento,
-                        observacion,
+                        "",  # observacion vacía - solo se usa para ediciones
                         nombre,
                     )
                     if exito:
@@ -157,7 +195,6 @@ class DiagnosisView(ctk.CTkFrame):
                         )
                         self.txt_diagnostico.delete(0, END)
                         self.txt_tratamiento.delete(0, END)
-                        self.txt_observacion.delete(0, END)
                         popup.destroy()
                     else:
                         messagebox.showerror(
