@@ -42,39 +42,113 @@ class FarmaceutaView(ctk.CTkFrame):
 
         self.tab_recetas = self.vista_pestanas.add("Ver Recetas")
         self.tab_inventario = self.vista_pestanas.add("Gestión de Inventario")
-        self.tab_ventas = self.vista_pestanas.add("Registrar Venta")
+        # self.tab_ventas = self.vista_pestanas.add("Registrar Venta") # REMOVIDO: Venta directa deshabilitada
         self.tab_alertas = self.vista_pestanas.add("Alertas")
 
         self._configurar_tab_recetas()
         self._configurar_tab_inventario()
-        self._configurar_tab_ventas()
+        # self._configurar_tab_ventas() # REMOVIDO
         self._configurar_tab_alertas()
 
     def _configurar_tab_recetas(self):
         ctk.CTkLabel(
             self.tab_recetas,
             text="Recetas Veterinarias Pendientes",
-            font=("Roboto", 18),
-        ).pack(pady=20)
+            font=("Roboto", 18, "bold"),
+        ).pack(pady=10)
+
+        # Botón para recargar manualmente
         btn_cargar = ctk.CTkButton(
             self.tab_recetas,
-            text="Cargar Recetas",
+            text="Actualizar Lista",
             command=self._manejar_cargar_recetas,
         )
         btn_cargar.pack(pady=5)
+
+        # Frame scrollable para la lista de recetas
+        self.frame_lista_recetas = ctk.CTkScrollableFrame(self.tab_recetas, width=700, height=400)
+        self.frame_lista_recetas.pack(pady=10, fill="both", expand=True)
+
         self.lbl_estado_recetas = ctk.CTkLabel(
-            self.tab_recetas, text="[Listado de recetas pendientes]"
+            self.tab_recetas, text=""
         )
-        self.lbl_estado_recetas.pack(pady=10)
+        self.lbl_estado_recetas.pack(pady=5)
+        
+        # Cargar recetas al inicio
+        self._manejar_cargar_recetas()
 
     def _manejar_cargar_recetas(self):
+        # Limpiar lista actual
+        for widget in self.frame_lista_recetas.winfo_children():
+            widget.destroy()
+
         recetas = self.controller.obtener_recetas_pendientes()
-        if recetas:
-            self.lbl_estado_recetas.configure(
-                text=f"Recetas cargadas: {len(recetas)} pendientes."
-            )
+        
+        if not recetas:
+            self.lbl_estado_recetas.configure(text="No hay recetas pendientes.", text_color="green")
+            return
+
+        self.lbl_estado_recetas.configure(text=f"Recetas pendientes: {len(recetas)}", text_color="white")
+
+        for r in recetas:
+            self._crear_tarjeta_receta(r)
+
+    def _crear_tarjeta_receta(self, receta):
+        # Desempaquetar datos (según receta_model.py)
+        # id_receta, id_producto, cantidad, Fecha_Cita, Mascota, Producto_Recetado, Veterinario_Emisor
+        id_receta = receta[0]
+        id_producto = receta[1]
+        cantidad = receta[2]
+        fecha = receta[3]
+        mascota = receta[4]
+        producto_nombre = receta[5]
+        veterinario = receta[6]
+
+        card = ctk.CTkFrame(self.frame_lista_recetas, fg_color="#2b2b2b", corner_radius=10)
+        card.pack(pady=5, padx=10, fill="x")
+
+        # Info Principal
+        info_text = (
+            f"Mascota: {mascota} | Vet: {veterinario}\n"
+            f"Producto: {producto_nombre} (Cant: {cantidad})\n"
+            f"Fecha: {fecha}"
+        )
+        ctk.CTkLabel(card, text=info_text, justify="left", font=("Roboto", 14)).pack(side="left", padx=10, pady=10)
+
+        # Botón Despachar
+        btn_despachar = ctk.CTkButton(
+            card, 
+            text="Despachar", 
+            fg_color="green", 
+            hover_color="darkgreen",
+            command=lambda r=id_receta, p=id_producto, c=cantidad: self._manejar_despacho(r, p, c)
+        )
+        btn_despachar.pack(side="right", padx=10, pady=10)
+
+    def _manejar_despacho(self, id_receta, id_producto, cantidad):
+        # Obtener usuario actual
+        id_farmaceuta = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.usuario_actual:
+            id_farmaceuta = self.controller.auth_controller.usuario_actual.id_usuario
+        elif hasattr(self.controller, 'usuario_actual'): # Fallback si se pasa directo
+             id_farmaceuta = self.controller.usuario_actual.id_usuario
+        
+        # Si no hay usuario logueado (modo dev o error), usar un ID default o mostrar error
+        if id_farmaceuta is None:
+             # Intentar obtenerlo del main app si es posible, o error
+             # Asumimos 1 para pruebas si falla, pero idealmente mostrar error
+             print("Advertencia: No se detectó usuario logueado. Usando ID 1 por defecto para pruebas.")
+             id_farmaceuta = 1 
+
+        exito, mensaje = self.controller.procesar_despacho(id_receta, id_producto, cantidad, id_farmaceuta)
+
+        if exito:
+            self.lbl_estado_recetas.configure(text=mensaje, text_color="green")
+            self._manejar_cargar_recetas() # Recargar lista
+            self._mostrar_tabla_inventario() # Actualizar inventario visualmente si está visible
+            self._actualizar_alertas()
         else:
-            self.lbl_estado_recetas.configure(text="No hay recetas pendientes.")
+            self.lbl_estado_recetas.configure(text=f"Error: {mensaje}", text_color="red")
 
     def _configurar_tab_inventario(self):
         ctk.CTkLabel(
@@ -92,7 +166,9 @@ class FarmaceutaView(ctk.CTkFrame):
         ).pack(pady=5)
 
         self.frame_tabla_inventario = ctk.CTkFrame(self.tab_inventario)
-        self.frame_tabla_inventario.pack(pady=10, fill="x")
+        self.frame_tabla_inventario.pack(pady=10, expand=True, anchor="center")
+        self.lbl_estado_inventario = ctk.CTkLabel(self.tab_inventario, text="", text_color="green")
+        self.lbl_estado_inventario.pack(pady=(0, 5))
         # Mostrar la tabla de inventario automáticamente al cargar la pestaña
         self._mostrar_tabla_inventario()
 
@@ -131,16 +207,18 @@ class FarmaceutaView(ctk.CTkFrame):
             costo_unitario = float(entries["costo_unitario"].get())
             fecha_vencimiento = entries["fecha_vencimiento"].get()
         except Exception:
-            ctk.CTkMessagebox(title="Error", message="Verifica los datos ingresados.", icon="cancel")
+            self.lbl_estado_inventario.configure(text="Verifica los datos ingresados.", text_color="red")
             return
         exito = self.controller.modelo.producto_model.actualizar_producto(
             id_producto, stock_actual, stock_minimo, precio_venta, costo_unitario, fecha_vencimiento
         )
         if exito:
-            ctk.CTkMessagebox(title="Éxito", message="Producto actualizado.", icon="check")
+            self.lbl_estado_inventario.configure(text="Producto actualizado.", text_color="green")
             self._mostrar_tabla_inventario()
+            # self._recargar_combo_productos() # Ya no es necesario si no hay combo de ventas
+            self.after(2000, lambda: self.lbl_estado_inventario.configure(text=""))
         else:
-            ctk.CTkMessagebox(title="Error", message="No se pudo actualizar el producto.", icon="cancel")
+            self.lbl_estado_inventario.configure(text="No se pudo actualizar el producto.", text_color="red")
 
     def _abrir_modal_agregar_producto(self):
         modal = ctk.CTkToplevel(self)
@@ -181,156 +259,11 @@ class FarmaceutaView(ctk.CTkFrame):
             if exito:
                 for entry in entradas.values():
                     entry.delete(0, "end")
-                self._recargar_combo_productos()
+                # self._recargar_combo_productos() # Ya no es necesario
                 self._actualizar_alertas()
 
         ctk.CTkButton(modal, text="Registrar Producto", command=registrar).pack(pady=10)
         ctk.CTkButton(modal, text="Cerrar", command=modal.destroy).pack(pady=5)
-
-    def _configurar_tab_ventas(self):
-        ctk.CTkLabel(
-            self.tab_ventas, text="Registro de Venta de Productos", font=("Roboto", 18)
-        ).pack(pady=20)
-
-        lista_productos_combo, self.mapeo_productos = (
-            self.controller.obtener_lista_productos_para_venta()
-        )
-
-        frame_inputs = ctk.CTkFrame(self.tab_ventas, fg_color="transparent")
-        frame_inputs.pack(pady=10)
-
-        self.lbl_detalle_producto = ctk.CTkLabel(
-            self.tab_ventas,
-            text="Producto: Seleccione un producto para ver detalle",
-            wraplength=400,
-            justify="left",
-            fg_color="#333333",
-            corner_radius=5,
-        )
-        self.lbl_detalle_producto.pack(pady=5, padx=20, fill="x")
-
-        ctk.CTkLabel(frame_inputs, text="Producto:").grid(
-            row=0, column=0, padx=10, pady=5, sticky="w"
-        )
-
-        self.combo_id_prod = ctk.CTkComboBox(
-            frame_inputs,
-            values=lista_productos_combo,
-            width=300,
-            command=self._manejar_seleccion_producto,
-        )
-        self.combo_id_prod.grid(row=0, column=1, padx=10, pady=5)
-
-        if lista_productos_combo:
-            self.combo_id_prod.set(lista_productos_combo[0])
-            self._manejar_seleccion_producto(lista_productos_combo[0])
-        else:
-            self.combo_id_prod.set("No hay productos disponibles")
-
-        ctk.CTkLabel(frame_inputs, text="Cantidad:").grid(
-            row=1, column=0, padx=10, pady=5, sticky="w"
-        )
-        self.entrada_cantidad = ctk.CTkEntry(frame_inputs, width=300)
-        self.entrada_cantidad.grid(row=1, column=1, padx=10, pady=5)
-
-        btn_venta = ctk.CTkButton(
-            self.tab_ventas,
-            text="Registrar Venta",
-            command=self._manejar_registro_venta,
-        )
-        btn_venta.pack(pady=10)
-        self.lbl_estado_venta = ctk.CTkLabel(self.tab_ventas, text="", text_color="white")
-        self.lbl_estado_venta.pack(pady=5)
-
-    def _obtener_id_seleccionado(self, valor_combo_seleccionado):
-        """Usa el mapeo para obtener el ID real del producto."""
-        return self.mapeo_productos.get(valor_combo_seleccionado, None)
-
-    def _manejar_seleccion_producto(self, valor_seleccionado):
-        """Maneja el evento de selección del ComboBox."""
-        self._manejar_busqueda_producto(valor_seleccionado=valor_seleccionado)
-
-    def _manejar_busqueda_producto(self, event=None, valor_seleccionado=None):
-        """Busca el producto por ID y actualiza la etiqueta de detalle."""
-
-        if valor_seleccionado is None:
-            valor_seleccionado = self.combo_id_prod.get()
-
-        id_producto = self._obtener_id_seleccionado(valor_seleccionado)
-
-        if id_producto is None:
-            self.lbl_detalle_producto.configure(
-                text="Producto: Seleccione un producto válido", text_color="red"
-            )
-            return
-
-        datos_producto = self.controller.obtener_datos_producto(id_producto)
-
-        if datos_producto:
-            nombre = datos_producto.get("nombre", "N/A")
-            stock = datos_producto.get("stock", "N/A")
-            vence = datos_producto.get("vence", "N/A")
-            precio = datos_producto.get("precio", "N/A")
-
-            detalle_text = (
-                f"Nombre: {nombre}\n"
-                f"Stock: {stock}\n"
-                f"Precio: ${precio:.2f}\n"
-                f"Vencimiento: {vence}\n"
-            )
-            self.lbl_detalle_producto.configure(text=detalle_text, text_color="white")
-        else:
-            self.lbl_detalle_producto.configure(
-                text="Producto: ID no encontrado en inventario", text_color="red"
-            )
-
-    def _manejar_registro_venta(self):
-        id_producto_combo = self.combo_id_prod.get()
-        id_producto = self._obtener_id_seleccionado(id_producto_combo)
-
-        if id_producto is None or id_producto == "" or id_producto == 0:
-            self.lbl_estado_venta.configure(
-                text="Error: Seleccione un producto válido de la lista.", text_color="red"
-            )
-            return
-
-        cantidad = self.entrada_cantidad.get()
-        if not cantidad.isdigit() or int(cantidad) <= 0:
-            self.lbl_estado_venta.configure(
-                text="Ingrese una cantidad válida (mayor a 0).", text_color="red"
-            )
-            return
-
-        exito, mensaje = self.controller.registrar_venta(id_producto, cantidad)
-
-        color = "green" if exito else "red"
-        self.lbl_estado_venta.configure(text=mensaje, text_color=color)
-
-        if exito:
-            self._recargar_combo_productos()
-
-            self._manejar_busqueda_producto(valor_seleccionado=id_producto_combo)
-
-            self.entrada_cantidad.delete(0, "end")
-
-            self._actualizar_alertas()
-
-    def _recargar_combo_productos(self):
-        """Recarga la lista del ComboBox después de una venta para reflejar el nuevo stock."""
-        lista_productos_combo, self.mapeo_productos = (
-            self.controller.obtener_lista_productos_para_venta()
-        )
-
-        valor_anterior = self.combo_id_prod.get()
-
-        self.combo_id_prod.configure(values=lista_productos_combo)
-
-        if valor_anterior in lista_productos_combo:
-            self.combo_id_prod.set(valor_anterior)
-        elif lista_productos_combo:
-            self.combo_id_prod.set(lista_productos_combo[0])
-        else:
-            self.combo_id_prod.set("No hay productos disponibles")
 
     def _configurar_tab_alertas(self):
         ctk.CTkLabel(

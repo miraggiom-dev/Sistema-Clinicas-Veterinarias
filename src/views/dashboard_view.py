@@ -64,7 +64,8 @@ class DashboardView(ctk.CTkFrame):
             opciones = [
                 ("Reportes", "ReportsView"),
                 ("Gestión de Precios", "GestionPreciosView"),
-                ("Usuarios", "UsersView")
+                ("Usuarios", "UsersView"),
+                ("Servicios", "ServiceView")
             ]
         elif self.rol == "Farmacéutico":
             opciones = [("Farmacia", "FarmaceutaView")]

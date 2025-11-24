@@ -10,6 +10,55 @@ class ReporteView(ctk.CTkFrame):
         self.switch_module_callback = switch_module_callback
         ctk.CTkLabel(self, text="Reportes Administrativos", font=("Roboto", 28, "bold")).pack(pady=10)
 
+        # Sección de ventas mensuales
+        self.frame_ventas = ctk.CTkFrame(self)
+        self.frame_ventas.pack(pady=10, padx=20, fill="x")
+        ctk.CTkLabel(self.frame_ventas, text="Ventas de Productos por Mes", font=("Roboto", 18)).grid(row=0, column=0, columnspan=6, pady=5)
+        ctk.CTkLabel(self.frame_ventas, text="Mes:").grid(row=1, column=0, sticky="e")
+        ctk.CTkLabel(self.frame_ventas, text="Año:").grid(row=2, column=0, sticky="e")
+        self.var_ventas_mes = ctk.StringVar(value=str(datetime.datetime.now().month))
+        self.var_ventas_anio = ctk.StringVar(value=str(datetime.datetime.now().year))
+        self.entry_ventas_mes = ctk.CTkEntry(self.frame_ventas, textvariable=self.var_ventas_mes, width=60)
+        self.entry_ventas_mes.grid(row=1, column=1, padx=5, pady=2)
+        self.entry_ventas_anio = ctk.CTkEntry(self.frame_ventas, textvariable=self.var_ventas_anio, width=60)
+        self.entry_ventas_anio.grid(row=2, column=1, padx=5, pady=2)
+        self.btn_ver_ventas = ctk.CTkButton(self.frame_ventas, text="Ver Ventas", command=self.mostrar_ventas_mensuales)
+        self.btn_ver_ventas.grid(row=3, column=0, columnspan=2, pady=8)
+        self.tabla_ventas = ctk.CTkFrame(self.frame_ventas)
+        self.tabla_ventas.grid(row=4, column=0, columnspan=6, pady=5)
+
+    def mostrar_ventas_mensuales(self):
+        for widget in self.tabla_ventas.winfo_children():
+            widget.destroy()
+        mes = self.var_ventas_mes.get()
+        anio = self.var_ventas_anio.get()
+        try:
+            mes_int = int(mes)
+            anio_int = int(anio)
+            if not (1 <= mes_int <= 12):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Error", "Mes o año inválido.")
+            return
+        ventas = self.controller.ventas_mensuales(mes_int, anio_int)
+        headers = ["ID Venta", "Fecha", "Producto", "Cantidad", "Total Venta ($)", "Farmaceuta"]
+        for col, h in enumerate(headers):
+            ctk.CTkLabel(self.tabla_ventas, text=h, font=("Roboto", 12, "bold")).grid(row=0, column=col, padx=5, pady=2)
+        total = 0
+        for i, row in enumerate(ventas, start=1):
+            for j, val in enumerate(row):
+                ctk.CTkLabel(self.tabla_ventas, text=str(val)).grid(row=i, column=j, padx=5, pady=2)
+            if len(row) > 4:
+                try:
+                    total += float(row[4])
+                except Exception:
+                    pass
+        if ventas:
+            ctk.CTkLabel(self.tabla_ventas, text="TOTAL DEL MES:", font=("Roboto", 12, "bold")).grid(row=len(ventas)+1, column=3, padx=5, pady=2)
+            ctk.CTkLabel(self.tabla_ventas, text=f"$ {total:.2f}", font=("Roboto", 12, "bold")).grid(row=len(ventas)+1, column=4, padx=5, pady=2)
+        else:
+            ctk.CTkLabel(self.tabla_ventas, text="No hay ventas para este mes.").grid(row=1, column=0, columnspan=6, pady=5)
+
 
         # Sección de rentabilidad por especialidad
         self.frame_rentabilidad = ctk.CTkFrame(self)
@@ -67,9 +116,9 @@ class ReporteView(ctk.CTkFrame):
         except ValueError:
             messagebox.showerror("Error", "Mes o año inválido.")
             return
-        datos = self.controller.ingresos_mensuales(mes_int, anio_int)
-        if not datos:
-            messagebox.showinfo("Sin datos", "No hay ingresos registrados para ese mes/año.")
+        ventas = self.controller.ventas_mensuales(mes_int, anio_int)
+        if not ventas:
+            messagebox.showinfo("Sin datos", "No hay ventas registradas para ese mes/año.")
             return
-        archivo = self.controller.exportar_txt(datos, mes_int, anio_int)
-        messagebox.showinfo("Éxito", f"Informe exportado correctamente en:\n{archivo}")
+        archivo = self.controller.exportar_ventas_txt(ventas, mes_int, anio_int)
+        messagebox.showinfo("Éxito", f"Informe de ventas exportado correctamente en:\n{archivo}")

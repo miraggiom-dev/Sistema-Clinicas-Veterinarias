@@ -1,12 +1,18 @@
-
 from models.ingresos_model import IngresosModel
 
 class ReporteController:
     """
     Controlador para reportes administrativos: rentabilidad, auditoría, ingresos, etc.
     """
+
     def __init__(self):
         self.ingresos_model = IngresosModel()
+
+    def ventas_mensuales(self, mes, anio):
+        return self.ingresos_model.obtener_ventas_por_mes(mes, anio)
+
+    def exportar_ventas_txt(self, ventas, mes, anio):
+        return self.ingresos_model.exportar_ventas_txt(ventas, mes, anio)
 
     def rentabilidad_por_especialidad(self, fecha_inicio=None, fecha_fin=None):
         # Retorna rentabilidad por especialidad (cirugía, consulta, vacunación)

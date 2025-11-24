@@ -52,6 +52,22 @@ def create_tables():
         conn.execute("PRAGMA foreign_keys = ON;")
         cursor = conn.cursor()
 
+        # 10. Tabla de Ventas (registro de ventas de productos por farmaceuta)
+        cursor.execute(
+            """
+        CREATE TABLE IF NOT EXISTS ventas (
+            id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_producto INTEGER NOT NULL,
+            id_farmaceuta INTEGER NOT NULL,
+            cantidad INTEGER NOT NULL,
+            fecha_venta TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            total_venta REAL NOT NULL,
+            FOREIGN KEY(id_producto) REFERENCES productos(id_producto),
+            FOREIGN KEY(id_farmaceuta) REFERENCES usuarios(id_usuario)
+        );
+        """
+        )
+
         # 1. Tabla de Usuarios
         cursor.execute(
             """

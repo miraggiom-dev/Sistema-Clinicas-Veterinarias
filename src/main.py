@@ -14,6 +14,8 @@ from views.farmaceuta_view import FarmaceutaView
 from controllers.reporte_controller import ReporteController
 from controllers.gestion_precios_controller import GestionPreciosController
 from views.gestion_precios_view import GestionPreciosView
+from controllers.service_controller import ServiceController
+from views.service_view import ServiceView
 
 from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
@@ -41,6 +43,7 @@ VIEW_MAP = {
     "MedicationsView": MedicationsView,
     "UsersView": UsersView,
     "GestionPreciosView": GestionPreciosView,
+    "ServiceView": ServiceView,
 }
 
 
@@ -62,6 +65,7 @@ class MainApp(ctk.CTk):
         self.historial_diagnostico_controller = HistorialDiagnosticoController()
         from controllers.users_controller import UsersController
         self.users_controller = UsersController()
+        self.service_controller = ServiceController()
         self.dashboard_view = None
 
         self.mostrar_login()
@@ -141,6 +145,8 @@ class MainApp(ctk.CTk):
             controller_a_usar = self.historial_diagnostico_controller
         elif module_key == "UsersView":
             controller_a_usar = self.users_controller
+        elif module_key == "ServiceView":
+            controller_a_usar = self.service_controller
         else:
             controller_a_usar = self.auth_controller
 
