@@ -14,28 +14,20 @@ class FarmaceutaView(ctk.CTkFrame):
         **kwargs,
     ):
 
-        # 1. La llamada a super() ya es correcta (solo master y **kwargs)
         super().__init__(master, **kwargs)
         
-        # 2. El controlador (FarmaceutaController) se asigna correctamente
         self.controller = controller
 
-        # Los atributos duplicados (mapeo_productos) y los no utilizados 
-        # (id_mascota, active_tab, switch_module_callback) se mantienen 
-        # para compatibilidad con la firma y el resto de tu código, 
-        # aunque 'mapeo_productos' se inicializa dos veces y los otros 
-        # tres parámetros no se usan en esta clase.
         self.id_mascota = id_mascota
         self.active_tab = active_tab
         self.switch_module_callback = switch_module_callback
 
-        self.mapeo_productos = {} # Duplicado, pero inofensivo
+        self.mapeo_productos = {} 
 
         ctk.CTkLabel(self, text="MÓDULO DE FARMACIA", font=("Roboto", 24, "bold")).pack(
             pady=10
         )
         
-        # ... (El resto del código de __init__ sigue igual) ...
 
         self.vista_pestanas = ctk.CTkTabview(self)
         self.vista_pestanas.pack(fill="both", expand=True, padx=10, pady=(0, 10))
