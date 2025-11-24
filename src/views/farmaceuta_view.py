@@ -80,11 +80,60 @@ class FarmaceutaView(ctk.CTkFrame):
         ctk.CTkLabel(
             self.tab_inventario, text="Control de Inventario", font=("Roboto", 18)
         ).pack(pady=20)
-        ctk.CTkButton(self.tab_inventario, text="Agregar Nuevo Producto").pack(pady=5)
+        ctk.CTkButton(
+            self.tab_inventario,
+            text="Agregar Nuevo Producto",
+            command=self._abrir_modal_agregar_producto
+        ).pack(pady=5)
         ctk.CTkButton(self.tab_inventario, text="Ver/Editar Inventario").pack(pady=5)
         ctk.CTkLabel(
             self.tab_inventario, text="[Aquí irá la tabla de inventario con filtros]"
         ).pack(pady=10)
+
+    def _abrir_modal_agregar_producto(self):
+        modal = ctk.CTkToplevel(self)
+        modal.title("Registrar Nuevo Producto")
+        modal.geometry("400x420")
+        modal.grab_set()
+
+        labels = [
+            ("Nombre", "nombre"),
+            ("Precio de Venta", "precio_venta"),
+            ("Costo Unitario", "costo_unitario"),
+            ("Stock Inicial", "stock_actual"),
+            ("Stock Mínimo", "stock_minimo"),
+            ("Fecha de Vencimiento (YYYY-MM-DD)", "fecha_vencimiento"),
+        ]
+        entradas = {}
+        for idx, (label, key) in enumerate(labels):
+            ctk.CTkLabel(modal, text=label).pack(pady=(10 if idx == 0 else 5, 0))
+            entry = ctk.CTkEntry(modal, width=300)
+            entry.pack()
+            entradas[key] = entry
+
+        lbl_estado = ctk.CTkLabel(modal, text="")
+        lbl_estado.pack(pady=10)
+
+        def registrar():
+            datos = {k: entradas[k].get() for _, k in labels}
+            exito, mensaje = self.controller.registrar_producto(
+                datos["nombre"],
+                datos["precio_venta"],
+                datos["costo_unitario"],
+                datos["stock_actual"],
+                datos["stock_minimo"],
+                datos["fecha_vencimiento"],
+            )
+            color = "green" if exito else "red"
+            lbl_estado.configure(text=mensaje, text_color=color)
+            if exito:
+                for entry in entradas.values():
+                    entry.delete(0, "end")
+                self._recargar_combo_productos()
+                self._actualizar_alertas()
+
+        ctk.CTkButton(modal, text="Registrar Producto", command=registrar).pack(pady=10)
+        ctk.CTkButton(modal, text="Cerrar", command=modal.destroy).pack(pady=5)
 
     def _configurar_tab_ventas(self):
         ctk.CTkLabel(
