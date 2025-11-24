@@ -54,8 +54,11 @@ class DashboardView(ctk.CTkFrame):
             opciones = [("Admisión", "AdmissionView"), ("Citas", "AppointmentView"), ("Comprobante", "ComprobanteView")] 
         elif self.rol == "Veterinario":
             opciones = [
-                ("Historial Clínico", "HistoryView"),
+                ("Historial Clínico", "VetHistoryView"),
                 ("Citas", "AppointmentView"),
+                ("Diagnósticos", "DiagnosisView"),
+                ("Tratamientos", "TreatmentView"),
+                ("Medicamentos", "MedicationsView"),
             ]
         elif self.rol == "Administrador":
             opciones = [
