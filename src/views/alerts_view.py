@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from controllers.alerts_controller import AlertsController # Importamos el NUEVO controller
+from controllers.alerts_controller import AlertsController 
 
 class AlertsView(ctk.CTkFrame):
+    
     def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None, **kwargs):
         super().__init__(master, **(kwargs or {}))
         
@@ -12,17 +13,14 @@ class AlertsView(ctk.CTkFrame):
 
         self.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Título
         ctk.CTkLabel(self, text="Alertas de Inactividad", font=("Arial", 16, "bold")).pack(anchor="w", pady=10)
         
         self.lbl_status = ctk.CTkLabel(self, text="Cargando...", text_color="gray")
         self.lbl_status.pack(anchor="w")
 
-        # Área de scroll
         self.scroll = ctk.CTkScrollableFrame(self, label_text="Mascotas")
         self.scroll.pack(fill="both", expand=True, pady=10)
 
-        # Botones
         btn_frame = ctk.CTkFrame(self)
         btn_frame.pack(fill="x", pady=5)
         ctk.CTkButton(btn_frame, text="Refrescar", command=self.cargar_datos).pack(side="left", padx=5)

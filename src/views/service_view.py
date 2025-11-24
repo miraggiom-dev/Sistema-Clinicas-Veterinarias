@@ -8,23 +8,18 @@ class ServiceView(ctk.CTkFrame):
         self.controller = controller
         self.switch_module_callback = switch_module_callback
 
-        # Layout configuration
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=0) # Fixed width for form
+        self.grid_columnconfigure(1, weight=0) 
         self.grid_rowconfigure(0, weight=1)
 
-        # --- Left Side: Service List ---
         self.left_panel = ctk.CTkFrame(self, fg_color="transparent")
         self.left_panel.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         
-        # Title
         ctk.CTkLabel(self.left_panel, text="Gestión de Servicios", font=("Roboto", 24, "bold")).pack(anchor="w", pady=(0, 20))
 
-        # Scrollable List
         self.scrollable_list = ctk.CTkScrollableFrame(self.left_panel, fg_color="transparent")
         self.scrollable_list.pack(fill="both", expand=True)
 
-        # --- Right Side: Form ---
         self.right_panel = ctk.CTkFrame(self, width=320, corner_radius=15, fg_color=("#e0e0e0", "#2b2b2b"))
         self.right_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
         self.right_panel.grid_propagate(False)
@@ -38,7 +33,7 @@ class ServiceView(ctk.CTkFrame):
 
         ctk.CTkLabel(container, text="Servicio", font=("Roboto", 20, "bold")).pack(pady=(0, 20))
 
-        self.var_id = ctk.StringVar() # Hidden ID
+        self.var_id = ctk.StringVar() 
 
         ctk.CTkLabel(container, text="Nombre:", anchor="w").pack(fill="x", pady=(5, 2))
         self.entry_nombre = ctk.CTkEntry(container, height=35)
@@ -86,7 +81,6 @@ class ServiceView(ctk.CTkFrame):
             return
 
         for s in servicios:
-            # Safe access to row data
             try:
                 s_id = s['id_servicio']
                 s_nombre = s['nombre']
@@ -102,32 +96,25 @@ class ServiceView(ctk.CTkFrame):
                 s_duracion = 0
                 s_activo = 0
 
-            # Card
             card = ctk.CTkFrame(self.scrollable_list, fg_color=("#ffffff", "#3a3a3a"), corner_radius=10)
             card.pack(fill="x", pady=5)
 
-            # Left Info
             info_frame = ctk.CTkFrame(card, fg_color="transparent")
             info_frame.pack(side="left", fill="both", expand=True, padx=15, pady=10)
             
             ctk.CTkLabel(info_frame, text=s_nombre, font=("Roboto", 16, "bold"), anchor="w").pack(fill="x")
             ctk.CTkLabel(info_frame, text=f"{s_tipo} • {s_duracion} min", font=("Roboto", 12), text_color="gray", anchor="w").pack(fill="x")
 
-            # Right Info & Action
             action_frame = ctk.CTkFrame(card, fg_color="transparent")
             action_frame.pack(side="right", padx=15, pady=10)
 
             price_lbl = ctk.CTkLabel(action_frame, text=f"${s_precio:,.2f}", font=("Roboto", 16, "bold"), text_color="#4a9eff")
             price_lbl.pack(side="top", anchor="e", pady=(0, 5))
 
-            status_color = "#2cc985" if s_activo else "#ff4d4d"
-            status_text = "Activo" if s_activo else "Inactivo"
             
-            # Status dot
             status_frame = ctk.CTkFrame(action_frame, fg_color="transparent")
             status_frame.pack(side="top", anchor="e")
             
-            # Edit Button
             btn_edit = ctk.CTkButton(action_frame, text="Editar", width=80, height=28, 
                                      fg_color="transparent", border_width=1, 
                                      command=partial(self.cargar_en_formulario, s))
@@ -181,7 +168,6 @@ class ServiceView(ctk.CTkFrame):
         s_id = self.var_id.get()
 
         if s_id:
-            # Update
             ok = self.controller.actualizar_servicio(s_id, nombre, tipo, precio, costo, duracion, activo)
             if ok:
                 messagebox.showinfo("Éxito", "Servicio actualizado correctamente.")
@@ -190,7 +176,6 @@ class ServiceView(ctk.CTkFrame):
             else:
                 messagebox.showerror("Error", "No se pudo actualizar el servicio.")
         else:
-            # Create
             new_id = self.controller.crear_servicio(nombre, tipo, precio, costo, duracion)
             if new_id:
                 messagebox.showinfo("Éxito", "Servicio creado correctamente.")

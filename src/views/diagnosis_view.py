@@ -15,7 +15,6 @@ class DiagnosisView(ctk.CTkFrame):
     def crear_widgets(self):
         from models.mascota_model import MascotaModel
 
-        # Card container
         self.center_frame = ctk.CTkFrame(
             self, 
             fg_color="#2a2a2a",
@@ -25,7 +24,6 @@ class DiagnosisView(ctk.CTkFrame):
         )
         self.center_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Title
         self.lbl_titulo = ctk.CTkLabel(
             self.center_frame, 
             text="Registro de Diagnóstico", 
@@ -34,14 +32,12 @@ class DiagnosisView(ctk.CTkFrame):
         )
         self.lbl_titulo.pack(pady=(30, 20), padx=40)
 
-        # Obtener todas las mascotas con propietario
         self.mascotas = MascotaModel.obtener_todas_con_propietario()
         self.mascota_map = {
             f"{m['nombre']} (Dueño: {m['propietario_nombre']})": m
             for m in self.mascotas
         }
         
-        # Label for combobox
         ctk.CTkLabel(
             self.center_frame,
             text="Seleccionar Mascota:",
@@ -77,7 +73,6 @@ class DiagnosisView(ctk.CTkFrame):
         )
         self.txt_tratamiento.pack(pady=8, padx=40)
 
-        # Bind Enter key
         self.txt_diagnostico.bind("<Return>", self.registrar_diagnostico)
         self.txt_tratamiento.bind("<Return>", self.registrar_diagnostico)
 
@@ -95,8 +90,7 @@ class DiagnosisView(ctk.CTkFrame):
 
     def registrar_diagnostico(self, event=None):
         from models.cita_model import CitaModel
-        from models.usuario_model import UsuarioModel
-        from tkinter import END, simpledialog
+        from tkinter import END
 
         mascota_key = self.cmb_mascota.get()
         if not mascota_key or mascota_key not in self.mascota_map:
@@ -127,7 +121,6 @@ class DiagnosisView(ctk.CTkFrame):
             messagebox.showerror("Error", "Debe ingresar diagnóstico y tratamiento.")
             return
 
-        # Popup de contraseña
         def pedir_contraseña():
             popup = ctk.CTkToplevel(self)
             popup.title("Firmar diagnóstico")
@@ -145,15 +138,10 @@ class DiagnosisView(ctk.CTkFrame):
 
             def intentar_firma(event=None):
                 password = entry_pass.get()
-                # Validar contraseña del veterinario en sesión (por email o id)
-                # Se asume que el email del veterinario está en cita["veterinario_email"]
-                # Si no, se debe obtener por id_veterinario
                 from models.usuario_model import UsuarioModel
 
-                # Buscar email del veterinario
                 email = email_veterinario
                 if not email:
-                    # Buscar email por id_veterinario
                     from database.connection import get_db_connection
 
                     conn = get_db_connection()
@@ -180,13 +168,12 @@ class DiagnosisView(ctk.CTkFrame):
                     return
                 user = UsuarioModel.autenticar(email, password)
                 if user:
-                    # Firma válida, guardar diagnóstico con firma
                     exito = self.diagnosis_controller.registrar_diagnostico_firmado(
                         id_cita,
                         id_veterinario,
                         diagnostico,
                         tratamiento,
-                        "",  # observacion vacía - solo se usa para ediciones
+                        "",  
                         nombre,
                     )
                     if exito:

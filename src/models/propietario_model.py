@@ -12,7 +12,7 @@ class PropietarioModel:
 
     @staticmethod
     def existe_cedula(cedula):
-        """Verifica si una cédula ya está registrada en la base de datos."""
+        
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -67,13 +67,13 @@ class PropietarioModel:
 
     @staticmethod
     def _is_valid_telefono(telefono):
-        """Valida que el teléfono contenga sólo dígitos y tenga una longitud razonable."""
+
         if telefono is None:
             return True
         tel = str(telefono).strip()
         if tel == "":
             return True
-        # permitir sólo dígitos (sin signos ni espacios)
+
         return bool(re.fullmatch(r"\d{6,15}", tel))
 
     @staticmethod
@@ -83,16 +83,12 @@ class PropietarioModel:
         em = str(email).strip()
         if em == "":
             return True
-        # validación básica de email
+
         return bool(re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", em))
 
     @staticmethod
     def actualizar(id_propietario, nombre=None, telefono=None, email=None, direccion=None):
-        """Actualiza los campos (excepto la cédula) de un propietario.
-
-        Retorna una tupla (success: bool, message: str).
-        """
-        # Validaciones
+    
         if nombre is not None:
             if str(nombre).strip() == "":
                 return (False, "El nombre no puede quedar vacío.")
@@ -103,7 +99,6 @@ class PropietarioModel:
         if not PropietarioModel._is_valid_email(email):
             return (False, "Email inválido.")
 
-        # Construir query dinámico sólo con campos proporcionados
         fields = []
         params = []
         if nombre is not None:
@@ -120,7 +115,7 @@ class PropietarioModel:
             params.append(str(direccion).strip())
 
         if not fields:
-            # nada para actualizar
+
             return (False, "No hay campos para actualizar.")
 
         params.append(id_propietario)

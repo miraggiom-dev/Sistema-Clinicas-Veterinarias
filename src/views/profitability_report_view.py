@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 
 class ProfitabilityReportView(ctk.CTkToplevel):
-    """Ventana para generar informes de rentabilidad por tipo de servicio."""
+
     def __init__(self, master=None):
         super().__init__(master)
         self.title("Generar Informe de Rentabilidad")
@@ -28,13 +28,11 @@ class ProfitabilityReportView(ctk.CTkToplevel):
 
         ctk.CTkLabel(container, text="Informe de Rentabilidad por Tipo", font=("Roboto", 16, "bold")).pack(pady=10)
 
-        # Selección de Tipo de Servicio
         ctk.CTkLabel(container, text="Tipo de Servicio:").pack(anchor="w", padx=20, pady=(10, 0))
         self.var_tipo = ctk.StringVar(value="Consulta")
         self.opt_tipo = ctk.CTkOptionMenu(container, variable=self.var_tipo, values=["Consulta", "Cirugía", "Vacunación"])
         self.opt_tipo.pack(fill="x", padx=20, pady=5)
 
-        # Selección de Mes y Año
         frame_date = ctk.CTkFrame(container, fg_color="transparent")
         frame_date.pack(pady=10)
 

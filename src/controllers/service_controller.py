@@ -5,11 +5,11 @@ class ServiceController:
         pass
 
     def obtener_servicios(self, activos_only=False):
-        """Obtiene todos los servicios."""
+
         return ServicioModel.obtener_todos(activos_only=activos_only)
 
     def crear_servicio(self, nombre, tipo, precio_base, costo_mano_obra, duracion_estimada):
-        """Crea un nuevo servicio."""
+
         try:
             precio_base = float(precio_base)
         except ValueError:
@@ -28,7 +28,7 @@ class ServiceController:
         return ServicioModel.crear(nombre, tipo, precio_base, costo_mano_obra, duracion_estimada)
 
     def actualizar_servicio(self, id_servicio, nombre, tipo, precio_base, costo_mano_obra, duracion_estimada, activo=True):
-        """Actualiza un servicio existente."""
+
         try:
             precio_base = float(precio_base)
         except ValueError:
@@ -55,9 +55,9 @@ class ServiceController:
         )
 
     def eliminar_servicio(self, id_servicio):
-        """Elimina (desactiva) un servicio."""
+
         return ServicioModel.eliminar(id_servicio)
 
     def reactivar_servicio(self, id_servicio):
-        """Reactiva un servicio."""
+
         return ServicioModel.reactivar(id_servicio)

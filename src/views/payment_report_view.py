@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 
 class PaymentReportView(ctk.CTkToplevel):
-    """Ventana para generar informes de pagos mensuales."""
+
     def __init__(self, master=None):
         super().__init__(master)
         self.title("Generar Informe de Pagos")
@@ -28,7 +28,6 @@ class PaymentReportView(ctk.CTkToplevel):
 
         ctk.CTkLabel(container, text="Informe Mensual de Pagos", font=("Roboto", 16, "bold")).pack(pady=10)
 
-        # Selección de Mes y Año
         frame_date = ctk.CTkFrame(container, fg_color="transparent")
         frame_date.pack(pady=10)
 

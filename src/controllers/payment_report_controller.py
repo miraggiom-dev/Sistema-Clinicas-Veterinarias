@@ -3,14 +3,12 @@ import os
 from datetime import datetime
 
 class PaymentReportController:
-    """Controlador para generar informes de pagos mensuales en formato TXT."""
 
     @staticmethod
     def generar_informe_mensual(mes, anio, salida_dir=None):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 1. Obtener ingresos por Servicios (Citas)
         query_servicios = """
             SELECT 
                 c.fecha_hora,
@@ -26,7 +24,6 @@ class PaymentReportController:
             AND c.estado != 'Cancelada'
         """
         
-        # 2. Obtener ingresos por Ventas (Productos)
         query_ventas = """
             SELECT 
                 v.fecha_venta as fecha_hora,
@@ -55,7 +52,6 @@ class PaymentReportController:
         finally:
             conn.close()
 
-        # Combinar y ordenar
         todos_pagos = []
         
         for s in servicios:
@@ -76,13 +72,11 @@ class PaymentReportController:
                 'monto': v['monto']
             })
             
-        # Ordenar por fecha
         todos_pagos.sort(key=lambda x: x['fecha'])
 
         if not todos_pagos:
             return None
 
-        # Generar archivo TXT
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         base_root = salida_dir or os.path.join(project_root, 'informes_pagos')
         base = os.path.join(base_root, anio_str, mes_str)

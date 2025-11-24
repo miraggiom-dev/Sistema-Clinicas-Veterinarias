@@ -6,7 +6,7 @@ class DiagnosticoModel:
 
     @staticmethod
     def obtener_actual_por_cita(id_cita):
-        """Obtiene la versión vigente del diagnóstico de una cita."""
+
         conn = get_db_connection()
         cursor = conn.cursor()
         query = "SELECT * FROM diagnosticos WHERE id_cita = ? AND es_actual = 1"
@@ -24,11 +24,7 @@ class DiagnosticoModel:
         observacion="",
         firma=None,
     ):
-        """
-        Maneja la lógica de versionado:
-        1. Si no existe, crea versión 1.
-        2. Si existe, desactiva el anterior y crea versión N+1.
-        """
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -50,8 +46,6 @@ class DiagnosticoModel:
                 )
                 nuevo_version = diagnostico_previo["version"] + 1
 
-            # Si la columna firma existe, la usamos
-            # Intentar insertar con firma, si falla por columna desconocida, intentar sin ella
             try:
                 query_insert = """
                     INSERT INTO diagnosticos (id_cita, id_veterinario, version, diagnostico, tratamiento, observacion_edicion, fecha_registro, es_actual, firma)
@@ -71,7 +65,6 @@ class DiagnosticoModel:
                     ),
                 )
             except Exception as e:
-                # Si la columna firma no existe, insertar sin ella
                 query_insert = """
                     INSERT INTO diagnosticos (id_cita, id_veterinario, version, diagnostico, tratamiento, observacion_edicion, fecha_registro, es_actual)
                     VALUES (?, ?, ?, ?, ?, ?, ?, 1)
@@ -101,7 +94,7 @@ class DiagnosticoModel:
 
     @staticmethod
     def obtener_historial_completo(id_cita):
-        """Para auditoría: Ver todos los cambios de un diagnóstico."""
+
         conn = get_db_connection()
         cursor = conn.cursor()
 

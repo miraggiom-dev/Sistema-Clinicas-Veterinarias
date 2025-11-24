@@ -3,14 +3,12 @@ import os
 from datetime import datetime
 
 class ProfitabilityReportController:
-    """Controlador para generar informes de rentabilidad por tipo de servicio en formato TXT."""
 
     @staticmethod
     def generar_informe(mes, anio, tipo_servicio):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Query para obtener citas del tipo especificado en el mes/año
         query = """
             SELECT 
                 c.id_cita,
@@ -46,10 +44,10 @@ class ProfitabilityReportController:
         if not rows:
             return None
 
-        # Generar archivo TXT
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        
         base_root = os.path.join(project_root, 'informes_rentabilidad')
-        # Estructura: informes_rentabilidad/AÑO/MES/TIPO
+
         base = os.path.join(base_root, anio_str, mes_str, tipo_servicio)
         
         try:

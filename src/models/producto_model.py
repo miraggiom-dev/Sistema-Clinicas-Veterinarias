@@ -3,7 +3,7 @@ from sqlite3 import Error
 
 class ProductoModel:
     def actualizar_producto(self, id_producto, stock_actual, stock_minimo, precio_venta, costo_unitario, fecha_vencimiento):
-        """Actualiza los datos editables de un producto."""
+
         conn = get_db_connection()
         if conn is None:
             return False
@@ -26,7 +26,7 @@ class ProductoModel:
             conn.close()
 
     def add_product(self, nombre, precio_venta, costo_unitario, stock_actual, stock_minimo, fecha_vencimiento):
-        """Inserta un nuevo producto al inventario."""
+
         conn = get_db_connection()
         if conn is None:
             return False
@@ -48,7 +48,7 @@ class ProductoModel:
             conn.close()
 
     def get_all_products(self):
-        """Obtiene todo el inventario (Query 2)."""
+
         conn = get_db_connection()
         if conn is None: return []
         
@@ -69,9 +69,7 @@ class ProductoModel:
             conn.close()
             
     def get_product_details(self, id_producto):
-        """
-        Obtiene nombre, stock, precio y vencimiento de un producto por su ID.
-        """
+        
         conn = get_db_connection()
         if conn is None: return None
         
@@ -101,7 +99,7 @@ class ProductoModel:
             conn.close()
 
     def get_low_stock_alerts(self):
-        """Obtiene productos con stock bajo (Query 3A). Retorna (id, nombre, stock_actual)."""
+
         conn = get_db_connection()
         if conn is None: return []
 
@@ -114,7 +112,7 @@ class ProductoModel:
         try:
             cursor = conn.cursor()
             cursor.execute(query)
-            # Retorna una lista de tuplas (id, nombre, stock)
+
             return cursor.fetchall() 
         except Error as e:
             print(f"Error al obtener alertas de stock: {e}")
@@ -123,7 +121,7 @@ class ProductoModel:
             conn.close()
     
     def get_expiry_alerts(self):
-        """Obtiene productos con vencimiento cercano (Query 3B - 90 días). Retorna (id, nombre, fecha_vencimiento)."""
+
         conn = get_db_connection()
         if conn is None: return []
 
@@ -136,7 +134,7 @@ class ProductoModel:
         try:
             cursor = conn.cursor()
             cursor.execute(query)
-            # Retorna una lista de tuplas (id, nombre, fecha)
+
             return cursor.fetchall() 
         except Error as e:
             print(f"Error al obtener alertas de vencimiento: {e}")
@@ -145,7 +143,7 @@ class ProductoModel:
             conn.close()
             
     def get_product_stock(self, id_producto):
-        """Obtiene el stock actual de un producto específico."""
+
         conn = get_db_connection()
         if conn is None: return None
         
@@ -162,7 +160,7 @@ class ProductoModel:
             conn.close()
             
     def update_product_stock(self, id_producto, cantidad_vendida):
-        """Actualiza el stock después de una venta."""
+
         conn = get_db_connection()
         if conn is None: return False
 
@@ -184,7 +182,7 @@ class ProductoModel:
 
     @staticmethod
     def obtener_todos():
-        """Static method for backward compatibility - returns all products"""
+
         conn = get_db_connection()
         if conn is None:
             return []
@@ -200,7 +198,7 @@ class ProductoModel:
 
     @staticmethod
     def crear(nombre, precio_venta, costo_unitario, stock_actual, fecha_vencimiento):
-        """Static method for backward compatibility - creates a new product"""
+
         conn = get_db_connection()
         if conn is None:
             return False
@@ -223,7 +221,7 @@ class ProductoModel:
 
     @staticmethod
     def descontar_stock(id_producto, cantidad):
-        """Static method for backward compatibility - decrements stock"""
+
         conn = get_db_connection()
         if conn is None:
             return False

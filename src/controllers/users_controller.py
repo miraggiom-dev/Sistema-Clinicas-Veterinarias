@@ -9,5 +9,3 @@ class UsersController:
 
     def crear_usuario(self, nombre, rol, email, password):
         return self.model.crear(nombre, rol, email, password)
-
-    # Métodos para editar/eliminar usuarios pueden agregarse aquí

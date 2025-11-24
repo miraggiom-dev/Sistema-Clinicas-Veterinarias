@@ -13,7 +13,7 @@ class GestionPreciosController:
         return self.servicio_model.obtener_todos(activos_only=False)
 
     def actualizar_precio_producto(self, id_producto, nuevo_precio):
-        # Actualiza el precio de un producto
+
         from database.connection import get_db_connection
         conn = get_db_connection()
         if conn is None:
@@ -33,5 +33,5 @@ class GestionPreciosController:
             conn.close()
 
     def actualizar_precio_servicio(self, id_servicio, nuevo_precio):
-        # Actualiza el precio base de un servicio
+
         return self.servicio_model.actualizar(id_servicio, precio_base=nuevo_precio)

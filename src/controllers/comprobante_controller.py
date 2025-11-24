@@ -4,17 +4,10 @@ from datetime import datetime
 
 
 class ComprobanteController:
-    """Controlador para generar comprobantes de citas en formato TXT.
-
-    Método principal:
-    - generar_comprobante_txt(id_cita, salida_dir=None) -> ruta_archivo o None
-    Nota: se dejó interfaz compatible retornando la ruta del archivo generado.
-    """
 
     @staticmethod
     def generar_comprobante_pdf(id_cita, salida_dir=None):
-        """Compatibilidad: genera un TXT y devuelve su ruta (nombre termina en .txt)."""
-        # internamente delegamos a la implementación TXT
+
         return ComprobanteController._generar_comprobante_txt(id_cita, salida_dir)
 
     @staticmethod
@@ -59,7 +52,6 @@ class ComprobanteController:
         if not row:
             return None
 
-        # Helper para sqlite3.Row o tuplas
         def _val(r, key, idx, default=''):
             try:
                 return r[key]
@@ -80,14 +72,14 @@ class ComprobanteController:
         veterinario = _val(row, 'veterinario', 12)
         servicio = _val(row, 'servicio', 14)
 
-        # preparar directorio de salida: por año/mes dentro de `comprobantes`
         now = datetime.now()
         year = now.strftime('%Y')
         month = now.strftime('%m')
-        # Si no se recibe `salida_dir`, guardar dentro de la raíz del proyecto
+
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         base_root = salida_dir or os.path.join(project_root, 'comprobantes')
         base = os.path.join(base_root, year, month)
+        
         try:
             os.makedirs(base, exist_ok=True)
         except Exception:

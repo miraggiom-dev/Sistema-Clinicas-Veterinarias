@@ -21,7 +21,6 @@ def _resolve_db_path():
         else:
             path = DATABASE_URL_ENV
     else:
-        # Ruta por defecto
         path = os.path.join(os.getcwd(), "veterinaria.db")
         print("La ruta creada es: ", path)
 
@@ -36,23 +35,17 @@ def _resolve_db_path():
     return str(p)
 
 
-# La variable global que contiene la ruta final de la DB
 DB_NAME = _resolve_db_path()
 
 
 def create_tables():
-    """
-    Se conecta a la base de datos SQLite (creándola si no existe) y
-    crea todas las tablas con la cláusula IF NOT EXISTS.
-    También inserta un usuario administrador por defecto.
-    """
+
     conn = None
     try:
         conn = sqlite3.connect(DB_NAME)
         conn.execute("PRAGMA foreign_keys = ON;")
         cursor = conn.cursor()
 
-        # 10. Tabla de Ventas (registro de ventas de productos por farmaceuta)
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS ventas (
@@ -68,7 +61,6 @@ def create_tables():
         """
         )
 
-        # 1. Tabla de Usuarios
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -82,7 +74,6 @@ def create_tables():
         """
         )
 
-        # 2. Tabla de Propietarios
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS propietarios (
@@ -96,7 +87,6 @@ def create_tables():
         """
         )
 
-        # 3. Tabla de Productos (Inventario)
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS productos (
@@ -111,7 +101,6 @@ def create_tables():
         """
         )
 
-        # 4. Tabla de Servicios
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS servicios (
@@ -125,15 +114,14 @@ def create_tables():
         );
         """
         )
-        
-        # Migración: Agregar columna 'tipo' si no existe
+
         try:
-            cursor.execute("ALTER TABLE servicios ADD COLUMN tipo TEXT NOT NULL DEFAULT 'Consulta'")
+            cursor.execute(
+                "ALTER TABLE servicios ADD COLUMN tipo TEXT NOT NULL DEFAULT 'Consulta'"
+            )
         except sqlite3.OperationalError:
-            # La columna ya existe
             pass
 
-        # 5. Tabla de Mascotas
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS mascotas (
@@ -149,7 +137,6 @@ def create_tables():
         """
         )
 
-        # 6. Tabla de Citas
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS citas (
@@ -168,7 +155,6 @@ def create_tables():
         """
         )
 
-        # 7. Tabla de Diagnósticos (Historial Clínico)
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS diagnosticos (
@@ -187,15 +173,12 @@ def create_tables():
         );
         """
         )
-        
-        # Migración: Agregar columna 'firma' si no existe
+
         try:
             cursor.execute("ALTER TABLE diagnosticos ADD COLUMN firma TEXT")
         except sqlite3.OperationalError:
-            # La columna ya existe
             pass
 
-        # 8. Tabla de Recetas (Artículos vendidos/usados)
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS recetas (
@@ -210,7 +193,6 @@ def create_tables():
         """
         )
 
-        # 9. Tabla de Auditorías/Logs
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS auditorias (

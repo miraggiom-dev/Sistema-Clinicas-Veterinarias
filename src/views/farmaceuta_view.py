@@ -5,8 +5,6 @@ class FarmaceutaView(ctk.CTkFrame):
     def __init__(
         self,
         master,
-        # CORRECCIÓN: Renombrar a 'controller'. En main.py se pasa 
-        #             FarmaceutaController, por lo que este nombre es más apropiado.
         controller, 
         id_mascota=None,
         active_tab=None,
@@ -14,40 +12,29 @@ class FarmaceutaView(ctk.CTkFrame):
         **kwargs,
     ):
 
-        # 1. La llamada a super() ya es correcta (solo master y **kwargs)
         super().__init__(master, **kwargs)
         
-        # 2. El controlador (FarmaceutaController) se asigna correctamente
         self.controller = controller
 
-        # Los atributos duplicados (mapeo_productos) y los no utilizados 
-        # (id_mascota, active_tab, switch_module_callback) se mantienen 
-        # para compatibilidad con la firma y el resto de tu código, 
-        # aunque 'mapeo_productos' se inicializa dos veces y los otros 
-        # tres parámetros no se usan en esta clase.
         self.id_mascota = id_mascota
         self.active_tab = active_tab
         self.switch_module_callback = switch_module_callback
 
-        self.mapeo_productos = {} # Duplicado, pero inofensivo
+        self.mapeo_productos = {} 
 
         ctk.CTkLabel(self, text="MÓDULO DE FARMACIA", font=("Roboto", 24, "bold")).pack(
             pady=10
         )
         
-        # ... (El resto del código de __init__ sigue igual) ...
-
         self.vista_pestanas = ctk.CTkTabview(self)
         self.vista_pestanas.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         self.tab_recetas = self.vista_pestanas.add("Ver Recetas")
         self.tab_inventario = self.vista_pestanas.add("Gestión de Inventario")
-        # self.tab_ventas = self.vista_pestanas.add("Registrar Venta") # REMOVIDO: Venta directa deshabilitada
         self.tab_alertas = self.vista_pestanas.add("Alertas")
 
         self._configurar_tab_recetas()
         self._configurar_tab_inventario()
-        # self._configurar_tab_ventas() # REMOVIDO
         self._configurar_tab_alertas()
 
     def _configurar_tab_recetas(self):
@@ -57,7 +44,6 @@ class FarmaceutaView(ctk.CTkFrame):
             font=("Roboto", 18, "bold"),
         ).pack(pady=10)
 
-        # Botón para recargar manualmente
         btn_cargar = ctk.CTkButton(
             self.tab_recetas,
             text="Actualizar Lista",
@@ -65,7 +51,6 @@ class FarmaceutaView(ctk.CTkFrame):
         )
         btn_cargar.pack(pady=5)
 
-        # Frame scrollable para la lista de recetas
         self.frame_lista_recetas = ctk.CTkScrollableFrame(self.tab_recetas, width=700, height=400)
         self.frame_lista_recetas.pack(pady=10, fill="both", expand=True)
 
@@ -74,11 +59,9 @@ class FarmaceutaView(ctk.CTkFrame):
         )
         self.lbl_estado_recetas.pack(pady=5)
         
-        # Cargar recetas al inicio
         self._manejar_cargar_recetas()
 
     def _manejar_cargar_recetas(self):
-        # Limpiar lista actual
         for widget in self.frame_lista_recetas.winfo_children():
             widget.destroy()
 
@@ -94,8 +77,6 @@ class FarmaceutaView(ctk.CTkFrame):
             self._crear_tarjeta_receta(r)
 
     def _crear_tarjeta_receta(self, receta):
-        # Desempaquetar datos (según receta_model.py)
-        # id_receta, id_producto, cantidad, Fecha_Cita, Mascota, Producto_Recetado, Veterinario_Emisor
         id_receta = receta[0]
         id_producto = receta[1]
         cantidad = receta[2]
@@ -107,7 +88,6 @@ class FarmaceutaView(ctk.CTkFrame):
         card = ctk.CTkFrame(self.frame_lista_recetas, fg_color="#2b2b2b", corner_radius=10)
         card.pack(pady=5, padx=10, fill="x")
 
-        # Info Principal
         info_text = (
             f"Mascota: {mascota} | Vet: {veterinario}\n"
             f"Producto: {producto_nombre} (Cant: {cantidad})\n"
@@ -115,7 +95,6 @@ class FarmaceutaView(ctk.CTkFrame):
         )
         ctk.CTkLabel(card, text=info_text, justify="left", font=("Roboto", 14)).pack(side="left", padx=10, pady=10)
 
-        # Botón Despachar
         btn_despachar = ctk.CTkButton(
             card, 
             text="Despachar", 
@@ -126,17 +105,13 @@ class FarmaceutaView(ctk.CTkFrame):
         btn_despachar.pack(side="right", padx=10, pady=10)
 
     def _manejar_despacho(self, id_receta, id_producto, cantidad):
-        # Obtener usuario actual
         id_farmaceuta = None
         if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.usuario_actual:
             id_farmaceuta = self.controller.auth_controller.usuario_actual.id_usuario
-        elif hasattr(self.controller, 'usuario_actual'): # Fallback si se pasa directo
+        elif hasattr(self.controller, 'usuario_actual'): 
              id_farmaceuta = self.controller.usuario_actual.id_usuario
         
-        # Si no hay usuario logueado (modo dev o error), usar un ID default o mostrar error
         if id_farmaceuta is None:
-             # Intentar obtenerlo del main app si es posible, o error
-             # Asumimos 1 para pruebas si falla, pero idealmente mostrar error
              print("Advertencia: No se detectó usuario logueado. Usando ID 1 por defecto para pruebas.")
              id_farmaceuta = 1 
 
@@ -144,8 +119,8 @@ class FarmaceutaView(ctk.CTkFrame):
 
         if exito:
             self.lbl_estado_recetas.configure(text=mensaje, text_color="green")
-            self._manejar_cargar_recetas() # Recargar lista
-            self._mostrar_tabla_inventario() # Actualizar inventario visualmente si está visible
+            self._manejar_cargar_recetas() 
+            self._mostrar_tabla_inventario()
             self._actualizar_alertas()
         else:
             self.lbl_estado_recetas.configure(text=f"Error: {mensaje}", text_color="red")
@@ -169,14 +144,13 @@ class FarmaceutaView(ctk.CTkFrame):
         self.frame_tabla_inventario.pack(pady=10, expand=True, anchor="center")
         self.lbl_estado_inventario = ctk.CTkLabel(self.tab_inventario, text="", text_color="green")
         self.lbl_estado_inventario.pack(pady=(0, 5))
-        # Mostrar la tabla de inventario automáticamente al cargar la pestaña
         self._mostrar_tabla_inventario()
 
     def _mostrar_tabla_inventario(self):
-        # Limpiar el frame de la tabla
+        
         for widget in self.frame_tabla_inventario.winfo_children():
             widget.destroy()
-        # Obtener productos
+            
         productos = self.controller.modelo.producto_model.get_all_products()
         headers = ["ID", "Nombre", "Stock", "Stock Mínimo", "Precio Venta", "Costo Unitario", "Vencimiento", "Acción"]
         for col, h in enumerate(headers):
@@ -186,20 +160,20 @@ class FarmaceutaView(ctk.CTkFrame):
             row_entries = {}
             ctk.CTkLabel(self.frame_tabla_inventario, text=str(prod[0])).grid(row=i, column=0, padx=5, pady=2)  # ID
             ctk.CTkLabel(self.frame_tabla_inventario, text=str(prod[1])).grid(row=i, column=1, padx=5, pady=2)  # Nombre
-            # Editable fields
+
             for j, field in zip(range(2, 7), ["stock_actual", "stock_minimo", "precio_venta", "costo_unitario", "fecha_vencimiento"]):
                 entry = ctk.CTkEntry(self.frame_tabla_inventario, width=80)
                 entry.insert(0, str(prod[j]))
                 entry.grid(row=i, column=j, padx=5, pady=2)
                 row_entries[field] = entry
-            # Botón guardar
+            
             btn = ctk.CTkButton(self.frame_tabla_inventario, text="Guardar", width=70,
                 command=lambda pid=prod[0], e=row_entries: self._guardar_edicion_producto(pid, e))
             btn.grid(row=i, column=7, padx=5, pady=2)
             self._inventario_entries[prod[0]] = row_entries
 
     def _guardar_edicion_producto(self, id_producto, entries):
-        # Obtener valores editados
+
         try:
             stock_actual = int(entries["stock_actual"].get())
             stock_minimo = int(entries["stock_minimo"].get())
@@ -215,7 +189,6 @@ class FarmaceutaView(ctk.CTkFrame):
         if exito:
             self.lbl_estado_inventario.configure(text="Producto actualizado.", text_color="green")
             self._mostrar_tabla_inventario()
-            # self._recargar_combo_productos() # Ya no es necesario si no hay combo de ventas
             self.after(2000, lambda: self.lbl_estado_inventario.configure(text=""))
         else:
             self.lbl_estado_inventario.configure(text="No se pudo actualizar el producto.", text_color="red")
@@ -259,7 +232,6 @@ class FarmaceutaView(ctk.CTkFrame):
             if exito:
                 for entry in entradas.values():
                     entry.delete(0, "end")
-                # self._recargar_combo_productos() # Ya no es necesario
                 self._actualizar_alertas()
 
         ctk.CTkButton(modal, text="Registrar Producto", command=registrar).pack(pady=10)

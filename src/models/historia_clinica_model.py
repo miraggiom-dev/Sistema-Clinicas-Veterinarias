@@ -1,12 +1,9 @@
 from database.connection import get_db_connection
 
-
 class HistoriaClinicaModel:
     @staticmethod
     def obtener_por_mascota(id_mascota):
-        """
-        Devuelve una lista de diagnósticos (historial clínico) para una mascota específica.
-        """
+      
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """

@@ -5,16 +5,14 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from controllers.historial_diagnostico_controller import HistorialDiagnosticoController
-from views.historial_diagnostico_view import HistorialDiagnosticoView
 from controllers.gestion_precios_controller import GestionPreciosController
-
 from database.schema_setup import create_tables
 from controllers.auth_controller import AuthController
 from controllers.farmaceuta_controller import FarmaceutaController
 from views.gestion_precios_view import GestionPreciosView
 from controllers.service_controller import ServiceController
 from views.service_view import ServiceView
-from views.login_view import LoginView 
+from views.login_view import LoginView
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
 from views.vet_history_view import VetHistoryView
@@ -22,12 +20,13 @@ from views.diagnosis_view import DiagnosisView
 from views.treatment_view import TreatmentView
 from views.medications_view import MedicationsView
 from views.appointment_view import AppointmentView
+from views.comprobante_view import ComprobanteView
+from views.alerts_view import AlertsView
+from views.payment_report_view import PaymentReportView
+from views.farmaceuta_view import FarmaceutaView
+from views.users_view import UsersView
+from controllers.users_controller import UsersController
 
-# --- Vistas de ejemplo ---
-
-from views.reporte_view import ReporteView
-        
-# --- MAPEO DE VISTAS ---
 
 VIEW_MAP = {
     "AdmissionView": AdmissionView,
@@ -35,13 +34,14 @@ VIEW_MAP = {
     "ComprobanteView": ComprobanteView,
     "AlertsView": AlertsView,
     "VetHistoryView": VetHistoryView,
-    "ReportsView": ReportsView,
+    "ReportsView": PaymentReportView,
     "FarmaceutaView": FarmaceutaView,
     "DiagnosisView": DiagnosisView,
     "TreatmentView": TreatmentView,
     "MedicationsView": MedicationsView,
     "GestionPreciosView": GestionPreciosView,
     "ServiceView": ServiceView,
+    "UsersView": UsersView,
 }
 
 
@@ -57,13 +57,11 @@ class MainApp(ctk.CTk):
 
         self.auth_controller = AuthController()
         self.farmaceuta_controller = FarmaceutaController()
-        self.dashboard_view = None
-        self.reporte_controller = ReporteController()
         self.gestion_precios_controller = GestionPreciosController()
         self.historial_diagnostico_controller = HistorialDiagnosticoController()
-        from controllers.users_controller import UsersController
-
         self.users_controller = UsersController()
+
+        self.dashboard_view = None
         self.service_controller = ServiceController()
 
         self.mostrar_login()

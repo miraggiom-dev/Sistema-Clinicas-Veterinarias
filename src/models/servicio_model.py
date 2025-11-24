@@ -1,16 +1,6 @@
 from database.connection import get_db_connection
 
 class ServicioModel:
-    """Modelo para operaciones CRUD sobre la tabla `servicios`.
-
-    Métodos:
-    - crear(nombre, tipo, precio_base, costo_mano_obra, duracion_estimada)
-    - obtener_todos(activos_only=True)
-    - obtener_por_id(id_servicio)
-    - actualizar(id_servicio, **kwargs)
-    - eliminar(id_servicio)  # borrado lógico (activo = 0)
-    - reactivar(id_servicio)
-    """
 
     @staticmethod
     def crear(nombre, tipo, precio_base=0.0, costo_mano_obra=0.0, duracion_estimada=30):
@@ -51,6 +41,7 @@ class ServicioModel:
 
     @staticmethod
     def obtener_por_id(id_servicio):
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
@@ -65,7 +56,7 @@ class ServicioModel:
 
     @staticmethod
     def actualizar(id_servicio, nombre=None, tipo=None, precio_base=None, costo_mano_obra=None, duracion_estimada=None, activo=None):
-        """Actualiza los campos proporcionados para el servicio indicado."""
+        
         fields = []
         params = []
         if nombre is not None:
@@ -107,10 +98,10 @@ class ServicioModel:
 
     @staticmethod
     def eliminar(id_servicio):
-        """Borrado lógico: marca `activo = 0` para no perder historial."""
+
         return ServicioModel.actualizar(id_servicio, activo=0)
 
     @staticmethod
     def reactivar(id_servicio):
-        """Re-activa un servicio previamente desactivado."""
+        
         return ServicioModel.actualizar(id_servicio, activo=1)
