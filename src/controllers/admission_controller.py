@@ -24,5 +24,11 @@ class AdmissionController:
 
     def actualizar_cliente(self, id_propietario, nombre=None, telefono=None, email=None, direccion=None):
         """Actualiza los datos de un propietario (no permite cambiar cédula)."""
-        # Propagar mensaje para interfaz
+ 
         return models.propietario_model.PropietarioModel.actualizar(id_propietario, nombre=nombre, telefono=telefono, email=email, direccion=direccion)
+
+    def enviar_recordatorio_mascota(self, id_propietario, id_mascota):
+        """
+        Simula el envío de un recordatorio (Email/WhatsApp).
+        """
+        return True, "Recordatorio enviado correctamente."

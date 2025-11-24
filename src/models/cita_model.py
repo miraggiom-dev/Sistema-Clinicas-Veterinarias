@@ -53,7 +53,6 @@ class CitaModel:
         """
         params = [id_veterinario, fecha_fin, fecha_inicio]
 
-        # Si es modificación, excluir la propia cita para que no choque consigo misma
         if id_cita_actual:
             query += " AND id_cita != ?"
             params.append(id_cita_actual)
@@ -62,12 +61,11 @@ class CitaModel:
         result = cursor.fetchone()
         conn.close()
         
-        # Retorna True si ESTÁ DISPONIBLE (result es None), False si está ocupado
         return result is None
 
     @staticmethod
     def agendar(id_mascota, id_veterinario, id_servicio, fecha_hora, fecha_fin, motivo):
-        # 1. Verificar disponibilidad del veterinario
+
         if not CitaModel.verificar_disponibilidad(id_veterinario, fecha_hora, fecha_fin):
             msg = f"El veterinario ya tiene una cita en el horario {fecha_hora} - {fecha_fin}."
             return False, msg
@@ -127,6 +125,25 @@ class CitaModel:
             conn.close()
 
     @staticmethod
+    def actualizar_estado(id_cita, nuevo_estado):
+        """Actualiza el campo 'estado' de una cita."""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE citas
+                SET estado = ?
+                WHERE id_cita = ?
+            """, (nuevo_estado, id_cita))
+            conn.commit()
+            return True, "Estado actualizado."
+        except Exception as e:
+            msg = f"Error actualizando estado: {e}"
+            return False, msg
+        finally:
+            conn.close()
+
+    @staticmethod
     def obtener_agenda_del_dia(fecha_filtro):
         """
         Muestra la agenda completa del día con Nombres reales (JOINs).
@@ -135,28 +152,42 @@ class CitaModel:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Este Query une 4 tablas para que el recepcionista vea todo claro
-        # Asumo que la tabla de veterinarios es 'usuarios' como pusiste en el FK
         query = """
             SELECT 
                 c.id_cita,
                 c.id_servicio,
-                time(c.fecha_hora) as hora_inicio,
-                time(c.fecha_fin) as hora_fin,
+                c.id_veterinario,
+                c.fecha_hora as hora_inicio,
+                c.fecha_fin as hora_fin,
                 m.nombre AS mascota,
+                p.nombre AS propietario,
                 u.nombre_completo AS veterinario,
                 s.nombre AS servicio,
                 c.estado,
                 c.motivo
             FROM citas c
             JOIN mascotas m ON c.id_mascota = m.id_mascota
+            JOIN propietarios p ON m.id_propietario = p.id_propietario
             JOIN usuarios u ON c.id_veterinario = u.id_usuario
             JOIN servicios s ON c.id_servicio = s.id_servicio
             WHERE date(c.fecha_hora) = ? 
-            AND c.estado != 'Cancelada'
             ORDER BY c.fecha_hora ASC
         """
         cursor.execute(query, (fecha_filtro,))
         rows = cursor.fetchall()
         conn.close()
         return rows
+    
+    @staticmethod
+    def obtener_historial_mascota(id_mascota):
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            query = "SELECT fecha_hora, estado FROM citas WHERE id_mascota = ? ORDER BY fecha_hora DESC"
+            cursor.execute(query, (id_mascota,))
+            rows = cursor.fetchall()
+            conn.close()
+            return rows
+        except Exception as e:
+            print(f"Error SQL Historial: {e}")
+            return []
