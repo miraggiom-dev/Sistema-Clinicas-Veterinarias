@@ -6,15 +6,15 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from controllers.historial_diagnostico_controller import HistorialDiagnosticoController
 from views.historial_diagnostico_view import HistorialDiagnosticoView
-from controllers.reporte_controller import ReporteController
 from controllers.gestion_precios_controller import GestionPreciosController
 
 from database.schema_setup import create_tables
 from controllers.auth_controller import AuthController
 from controllers.farmaceuta_controller import FarmaceutaController
 from views.gestion_precios_view import GestionPreciosView
-from views.farmaceuta_view import FarmaceutaView
-from views.login_view import LoginView
+from controllers.service_controller import ServiceController
+from views.service_view import ServiceView
+from views.login_view import LoginView 
 from views.dashboard_view import DashboardView
 from views.admission_view import AdmissionView
 from views.vet_history_view import VetHistoryView
@@ -22,28 +22,11 @@ from views.diagnosis_view import DiagnosisView
 from views.treatment_view import TreatmentView
 from views.medications_view import MedicationsView
 from views.appointment_view import AppointmentView
-from views.comprobante_view import ComprobanteView
-from views.alerts_view import AlertsView
 
+# --- Vistas de ejemplo ---
 
-class ReportsView(ctk.CTkFrame):
-
-    def __init__(
-        self,
-        master,
-        controller,
-        id_mascota=None,
-        active_tab=None,
-        switch_module_callback=None,
-        **kwargs,
-    ):
-        super().__init__(master, **kwargs)
-        self.controller = controller
-        ctk.CTkLabel(
-            self, text="MÓDULO DE REPORTES PENDIENTE", font=("Roboto", 30)
-        ).pack(expand=True)
-
-
+from views.reporte_view import ReporteView
+        
 # --- MAPEO DE VISTAS ---
 
 VIEW_MAP = {
@@ -58,6 +41,7 @@ VIEW_MAP = {
     "TreatmentView": TreatmentView,
     "MedicationsView": MedicationsView,
     "GestionPreciosView": GestionPreciosView,
+    "ServiceView": ServiceView,
 }
 
 
@@ -80,6 +64,7 @@ class MainApp(ctk.CTk):
         from controllers.users_controller import UsersController
 
         self.users_controller = UsersController()
+        self.service_controller = ServiceController()
 
         self.mostrar_login()
 
@@ -122,7 +107,7 @@ class MainApp(ctk.CTk):
         elif rol == "Veterinario":
             return "VetHistoryView"
         elif rol == "Administrador":
-            return "ReportsView"
+            return "UsersView"
         elif rol == "Farmacéutico":
             return "FarmaceutaView"
         return None
@@ -146,14 +131,14 @@ class MainApp(ctk.CTk):
 
         if module_key == "FarmaceutaView":
             controller_a_usar = self.farmaceuta_controller
-        elif module_key == "ReportsView":
-            controller_a_usar = self.reporte_controller
         elif module_key == "GestionPreciosView":
             controller_a_usar = self.gestion_precios_controller
         elif module_key == "HistorialDiagnosticoView":
             controller_a_usar = self.historial_diagnostico_controller
         elif module_key == "UsersView":
             controller_a_usar = self.users_controller
+        elif module_key == "ServiceView":
+            controller_a_usar = self.service_controller
         else:
             controller_a_usar = self.auth_controller
 

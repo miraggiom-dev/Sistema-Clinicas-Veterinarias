@@ -6,49 +6,107 @@ class UsersView(ctk.CTkFrame):
         super().__init__(master, **kwargs)
         self.controller = controller
         self.switch_module_callback = switch_module_callback
-        ctk.CTkLabel(self, text="Gestión de Usuarios", font=("Roboto", 28, "bold")).pack(pady=10)
+        
+        # Layout configuration
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0) # Fixed width for form
+        self.grid_rowconfigure(0, weight=1)
 
-        # Tabla de usuarios
-        self.tabla = ctk.CTkFrame(self)
-        self.tabla.pack(pady=10, padx=20, fill="x")
+        # --- Left Side: User List ---
+        self.left_panel = ctk.CTkFrame(self, fg_color="transparent")
+        self.left_panel.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        
+        # Title
+        ctk.CTkLabel(self.left_panel, text="Gestión de Usuarios", font=("Roboto", 24, "bold")).pack(anchor="w", pady=(0, 20))
+
+        # Scrollable List
+        self.scrollable_list = ctk.CTkScrollableFrame(self.left_panel, fg_color="transparent")
+        self.scrollable_list.pack(fill="both", expand=True)
+
+        # --- Right Side: Form ---
+        self.right_panel = ctk.CTkFrame(self, width=300, corner_radius=15, fg_color=("#e0e0e0", "#2b2b2b"))
+        self.right_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
+        self.right_panel.grid_propagate(False) # Enforce width
+
+        self._build_form()
         self.mostrar_usuarios()
 
-        # Formulario de alta
-        self.frame_form = ctk.CTkFrame(self)
-        self.frame_form.pack(pady=10, padx=20, fill="x")
-        ctk.CTkLabel(self.frame_form, text="Nombre completo:").grid(row=0, column=0, sticky="e")
-        ctk.CTkLabel(self.frame_form, text="Rol:").grid(row=1, column=0, sticky="e")
-        ctk.CTkLabel(self.frame_form, text="Email:").grid(row=2, column=0, sticky="e")
-        ctk.CTkLabel(self.frame_form, text="Contraseña:").grid(row=3, column=0, sticky="e")
+    def _build_form(self):
+        container = ctk.CTkFrame(self.right_panel, fg_color="transparent")
+        container.pack(fill="both", expand=True, padx=20, pady=20)
+
+        ctk.CTkLabel(container, text="Nuevo Usuario", font=("Roboto", 20, "bold")).pack(pady=(0, 20))
+
+        ctk.CTkLabel(container, text="Nombre Completo:", anchor="w").pack(fill="x", pady=(10, 5))
         self.var_nombre = ctk.StringVar()
+        ctk.CTkEntry(container, textvariable=self.var_nombre, height=35).pack(fill="x")
+
+        ctk.CTkLabel(container, text="Rol:", anchor="w").pack(fill="x", pady=(10, 5))
         self.var_rol = ctk.StringVar(value="Recepcionista")
+        ctk.CTkOptionMenu(container, variable=self.var_rol, 
+                          values=["Recepcionista", "Veterinario", "Farmacéutico", "Administrador"],
+                          height=35).pack(fill="x")
+
+        ctk.CTkLabel(container, text="Email:", anchor="w").pack(fill="x", pady=(10, 5))
         self.var_email = ctk.StringVar()
+        ctk.CTkEntry(container, textvariable=self.var_email, height=35).pack(fill="x")
+
+        ctk.CTkLabel(container, text="Contraseña:", anchor="w").pack(fill="x", pady=(10, 5))
         self.var_password = ctk.StringVar()
-        ctk.CTkEntry(self.frame_form, textvariable=self.var_nombre, width=180).grid(row=0, column=1, padx=5, pady=2)
-        ctk.CTkOptionMenu(self.frame_form, variable=self.var_rol, values=["Recepcionista", "Veterinario", "Farmacéutico", "Administrador"]).grid(row=1, column=1, padx=5, pady=2)
-        ctk.CTkEntry(self.frame_form, textvariable=self.var_email, width=180).grid(row=2, column=1, padx=5, pady=2)
-        ctk.CTkEntry(self.frame_form, textvariable=self.var_password, show="*", width=180).grid(row=3, column=1, padx=5, pady=2)
-        ctk.CTkButton(self.frame_form, text="Crear Usuario", command=self.crear_usuario).grid(row=4, column=0, columnspan=2, pady=8)
+        ctk.CTkEntry(container, textvariable=self.var_password, show="*", height=35).pack(fill="x")
+
+        ctk.CTkButton(container, text="Crear Usuario", command=self.crear_usuario, 
+                      height=40, font=("Roboto", 14, "bold"), fg_color="#1f6aa5", hover_color="#144870").pack(fill="x", pady=(30, 0))
 
     def mostrar_usuarios(self):
-        for widget in self.tabla.winfo_children():
+        for widget in self.scrollable_list.winfo_children():
             widget.destroy()
-        headers = ["ID", "Nombre", "Rol", "Email", "Estado"]
-        for col, h in enumerate(headers):
-            ctk.CTkLabel(self.tabla, text=h, font=("Roboto", 12, "bold")).grid(row=0, column=col, padx=5, pady=2)
+
         usuarios = self.controller.obtener_usuarios()
-        for i, user in enumerate(usuarios, start=1):
-            for j, val in enumerate(user):
-                ctk.CTkLabel(self.tabla, text=str(val)).grid(row=i, column=j, padx=5, pady=2)
+        
+        if not usuarios:
+            ctk.CTkLabel(self.scrollable_list, text="No hay usuarios registrados.", text_color="gray").pack(pady=20)
+            return
+
+        # Headers
+        header_frame = ctk.CTkFrame(self.scrollable_list, fg_color="transparent")
+        header_frame.pack(fill="x", pady=(0, 10))
+        headers = ["ID", "Nombre", "Rol", "Email", "Estado"]
+        weights = [1, 3, 2, 3, 1]
+        
+        for h, w in zip(headers, weights):
+            lbl = ctk.CTkLabel(header_frame, text=h, font=("Roboto", 12, "bold"), text_color="gray", anchor="w")
+            lbl.pack(side="left", expand=True, fill="x", padx=5)
+
+        # Rows
+        for user in usuarios:
+            # user: (id, nombre, rol, email, password, estado)
+            card = ctk.CTkFrame(self.scrollable_list, fg_color=("#ffffff", "#3a3a3a"), corner_radius=10)
+            card.pack(fill="x", pady=5)
+            
+            # Data mapping
+            uid = str(user[0])
+            nombre = user[1]
+            rol = user[2]
+            email = user[3]
+            estado = "Activo" if user[4] else "Inactivo"
+            
+            values = [uid, nombre, rol, email, estado]
+            
+            for val, w in zip(values, weights):
+                lbl = ctk.CTkLabel(card, text=val, font=("Roboto", 12), anchor="w")
+                lbl.pack(side="left", expand=True, fill="x", padx=10, pady=12)
 
     def crear_usuario(self):
         nombre = self.var_nombre.get().strip()
         rol = self.var_rol.get().strip()
         email = self.var_email.get().strip()
         password = self.var_password.get().strip()
+        
         if not (nombre and rol and email and password):
             messagebox.showerror("Error", "Todos los campos son obligatorios.")
             return
+            
         ok = self.controller.crear_usuario(nombre, rol, email, password)
         if ok:
             messagebox.showinfo("Éxito", "Usuario creado correctamente.")

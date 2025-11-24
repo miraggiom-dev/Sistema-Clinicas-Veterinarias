@@ -52,6 +52,22 @@ def create_tables():
         conn.execute("PRAGMA foreign_keys = ON;")
         cursor = conn.cursor()
 
+        # 10. Tabla de Ventas (registro de ventas de productos por farmaceuta)
+        cursor.execute(
+            """
+        CREATE TABLE IF NOT EXISTS ventas (
+            id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_producto INTEGER NOT NULL,
+            id_farmaceuta INTEGER NOT NULL,
+            cantidad INTEGER NOT NULL,
+            fecha_venta TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            total_venta REAL NOT NULL,
+            FOREIGN KEY(id_producto) REFERENCES productos(id_producto),
+            FOREIGN KEY(id_farmaceuta) REFERENCES usuarios(id_usuario)
+        );
+        """
+        )
+
         # 1. Tabla de Usuarios
         cursor.execute(
             """
@@ -101,6 +117,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS servicios (
             id_servicio INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
+            tipo TEXT NOT NULL DEFAULT 'Consulta', -- Cirugía, Consulta, Vacunación, etc.
             precio_base REAL NOT NULL,
             costo_mano_obra REAL NOT NULL,
             duracion_estimada INTEGER NOT NULL, -- en minutos
@@ -108,6 +125,13 @@ def create_tables():
         );
         """
         )
+        
+        # Migración: Agregar columna 'tipo' si no existe
+        try:
+            cursor.execute("ALTER TABLE servicios ADD COLUMN tipo TEXT NOT NULL DEFAULT 'Consulta'")
+        except sqlite3.OperationalError:
+            # La columna ya existe
+            pass
 
         # 5. Tabla de Mascotas
         cursor.execute(
@@ -157,11 +181,19 @@ def create_tables():
             observacion_edicion TEXT,
             fecha_registro TEXT NOT NULL,
             es_actual INTEGER NOT NULL DEFAULT 1,
+            firma TEXT,
             FOREIGN KEY(id_cita) REFERENCES citas(id_cita),
             FOREIGN KEY(id_veterinario) REFERENCES usuarios(id_usuario)
         );
         """
         )
+        
+        # Migración: Agregar columna 'firma' si no existe
+        try:
+            cursor.execute("ALTER TABLE diagnosticos ADD COLUMN firma TEXT")
+        except sqlite3.OperationalError:
+            # La columna ya existe
+            pass
 
         # 8. Tabla de Recetas (Artículos vendidos/usados)
         cursor.execute(
