@@ -97,7 +97,7 @@ class DashboardView(ctk.CTkFrame):
                 ("Citas", "AppointmentView"),
                 ("Diagnósticos", "DiagnosisView"),
                 ("Tratamientos", "TreatmentView"),
-                ("Medicamentos", "MedicationsView"),
+                #("Medicamentos", "MedicationsView"),
             ]
         elif self.rol == "Administrador":
             opciones = [
