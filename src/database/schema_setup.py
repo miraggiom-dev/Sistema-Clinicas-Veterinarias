@@ -21,7 +21,6 @@ def _resolve_db_path():
         else:
             path = DATABASE_URL_ENV
     else:
-        # Ruta por defecto
         path = os.path.join(os.getcwd(), "veterinaria.db")
         print("La ruta creada es: ", path)
 
@@ -36,23 +35,32 @@ def _resolve_db_path():
     return str(p)
 
 
-# La variable global que contiene la ruta final de la DB
 DB_NAME = _resolve_db_path()
 
 
 def create_tables():
-    """
-    Se conecta a la base de datos SQLite (creándola si no existe) y
-    crea todas las tablas con la cláusula IF NOT EXISTS.
-    También inserta un usuario administrador por defecto.
-    """
+
     conn = None
     try:
         conn = sqlite3.connect(DB_NAME)
         conn.execute("PRAGMA foreign_keys = ON;")
         cursor = conn.cursor()
 
-        # 1. Tabla de Usuarios
+        cursor.execute(
+            """
+        CREATE TABLE IF NOT EXISTS ventas (
+            id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_producto INTEGER NOT NULL,
+            id_farmaceuta INTEGER NOT NULL,
+            cantidad INTEGER NOT NULL,
+            fecha_venta TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            total_venta REAL NOT NULL,
+            FOREIGN KEY(id_producto) REFERENCES productos(id_producto),
+            FOREIGN KEY(id_farmaceuta) REFERENCES usuarios(id_usuario)
+        );
+        """
+        )
+
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -66,7 +74,6 @@ def create_tables():
         """
         )
 
-        # 2. Tabla de Propietarios
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS propietarios (
@@ -80,7 +87,6 @@ def create_tables():
         """
         )
 
-        # 3. Tabla de Productos (Inventario)
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS productos (
@@ -95,12 +101,12 @@ def create_tables():
         """
         )
 
-        # 4. Tabla de Servicios
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS servicios (
             id_servicio INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
+            tipo TEXT NOT NULL DEFAULT 'Consulta', -- Cirugía, Consulta, Vacunación, etc.
             precio_base REAL NOT NULL,
             costo_mano_obra REAL NOT NULL,
             duracion_estimada INTEGER NOT NULL, -- en minutos
@@ -109,7 +115,13 @@ def create_tables():
         """
         )
 
-        # 5. Tabla de Mascotas
+        try:
+            cursor.execute(
+                "ALTER TABLE servicios ADD COLUMN tipo TEXT NOT NULL DEFAULT 'Consulta'"
+            )
+        except sqlite3.OperationalError:
+            pass
+
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS mascotas (
@@ -125,7 +137,6 @@ def create_tables():
         """
         )
 
-        # 6. Tabla de Citas
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS citas (
@@ -144,7 +155,6 @@ def create_tables():
         """
         )
 
-        # 7. Tabla de Diagnósticos (Historial Clínico)
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS diagnosticos (
@@ -157,13 +167,18 @@ def create_tables():
             observacion_edicion TEXT,
             fecha_registro TEXT NOT NULL,
             es_actual INTEGER NOT NULL DEFAULT 1,
+            firma TEXT,
             FOREIGN KEY(id_cita) REFERENCES citas(id_cita),
             FOREIGN KEY(id_veterinario) REFERENCES usuarios(id_usuario)
         );
         """
         )
 
-        # 8. Tabla de Recetas (Artículos vendidos/usados)
+        try:
+            cursor.execute("ALTER TABLE diagnosticos ADD COLUMN firma TEXT")
+        except sqlite3.OperationalError:
+            pass
+
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS recetas (
@@ -178,7 +193,6 @@ def create_tables():
         """
         )
 
-        # 9. Tabla de Auditorías/Logs
         cursor.execute(
             """
         CREATE TABLE IF NOT EXISTS auditorias (

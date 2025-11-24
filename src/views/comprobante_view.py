@@ -6,7 +6,7 @@ import webbrowser
 
 
 class ComprobanteView(ctk.CTkToplevel):
-    """Ventana simple para generar comprobantes de cita por ID."""
+    
     def __init__(self, master=None):
         super().__init__(master)
         self.title("Generar Comprobante")
@@ -76,7 +76,7 @@ class ComprobanteView(ctk.CTkToplevel):
             self.lbl_status.configure(text="No se pudo generar comprobante.", text_color="red")
 
     def _cargar_citas(self):
-        # Cargar citas que no estén canceladas
+
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -104,7 +104,6 @@ class ComprobanteView(ctk.CTkToplevel):
                 propietario = r['propietario'] or ''
                 label = f"{cid} - {fh} - {mascota} ({propietario})"
             except Exception:
-                # tuple fallback
                 cid = r[0]
                 fh = r[1]
                 mascota = r[2] if len(r) > 2 else ''
@@ -122,7 +121,7 @@ class ComprobanteView(ctk.CTkToplevel):
             self.opt_citas.set(self._citas_labels[0])
 
     def _abrir_carpeta(self):
-        # Abrir la carpeta de comprobantes dentro de la raíz del proyecto
+        
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         base = os.path.join(project_root, 'comprobantes')
         try:

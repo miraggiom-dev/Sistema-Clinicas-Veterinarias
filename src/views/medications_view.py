@@ -2,7 +2,6 @@ import customtkinter as ctk
 from controllers.medications_controller import MedicationsController
 from tkinter import messagebox
 
-
 class MedicationsView(ctk.CTkFrame):
     def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None):
         super().__init__(master)
@@ -11,9 +10,8 @@ class MedicationsView(ctk.CTkFrame):
         self.crear_widgets()
 
     def crear_widgets(self):
-        from models.producto_model import ProductoModel
+        
 
-        # Card container
         self.center_frame = ctk.CTkFrame(
             self, 
             fg_color="#2a2a2a",
@@ -23,7 +21,6 @@ class MedicationsView(ctk.CTkFrame):
         )
         self.center_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Title
         self.lbl_titulo = ctk.CTkLabel(
             self.center_frame, 
             text="Registrar Medicamento (Inventario)", 
@@ -32,7 +29,6 @@ class MedicationsView(ctk.CTkFrame):
         )
         self.lbl_titulo.pack(pady=(30, 20), padx=40)
 
-        # Campos para producto
         self.txt_nombre = ctk.CTkEntry(
             self.center_frame, 
             placeholder_text="Nombre del medicamento", 
@@ -78,7 +74,6 @@ class MedicationsView(ctk.CTkFrame):
         )
         self.txt_fecha_vencimiento.pack(pady=8, padx=40)
 
-        # Bind Enter key
         self.txt_nombre.bind("<Return>", self.registrar_medicamento)
         self.txt_precio_venta.bind("<Return>", self.registrar_medicamento)
         self.txt_costo_unitario.bind("<Return>", self.registrar_medicamento)

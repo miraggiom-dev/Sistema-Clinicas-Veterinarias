@@ -1,10 +1,9 @@
 from database.connection import get_db_connection
 
-
 class UsuarioModel:
     @staticmethod
     def crear(nombre, rol, email, password):
-        """Crea un nuevo usuario con rol, email y password."""
+
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
@@ -32,7 +31,6 @@ class UsuarioModel:
 
     @staticmethod
     def autenticar(email, password):
-        """Verifica credenciales y retorna el usuario si es correcto."""
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -52,7 +50,7 @@ class UsuarioModel:
 
     @staticmethod
     def obtener_todos():
-        """Para uso del Admin: Listar usuarios."""
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id_usuario, nombre_completo, rol, email, estado FROM usuarios")

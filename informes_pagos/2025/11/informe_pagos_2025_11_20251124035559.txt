@@ -1,0 +1,28 @@
+INFORME DE PAGOS MENSUAL - 11/2025
+============================================================
+FECHA                | TIPO       | DESCRIPCION               |      MONTO
+------------------------------------------------------------
+2025-11-24 01:40:47  | Venta      | Amoxicilina 250mg (Blister) |      15.00
+2025-11-24 01:40:48  | Venta      | Collar Isabelino M        |      20.00
+2025-11-24 01:40:49  | Venta      | Collar Isabelino M        |      20.00
+2025-11-24 02:21:44  | Venta      | Amoxicilina 250mg (Blister) |      15.00
+2025-11-24 02:49:13  | Venta      | Collar Isabelino M        |     240.00
+2025-11-24 02:49:14  | Venta      | Alimento Hipoalergénico 1kg |     450.00
+2025-11-24 03:54:34  | Venta      | Desparasitante Interno (Paq. 5) |      85.00
+2025-11-24 03:55:06  | Venta      | Desparasitante Interno (Paq. 5) |     680.00
+2025-11-24 10:00:00  | Servicio   | Cirugía Menor             |     150.00
+2025-11-25 09:00:00  | Servicio   | Consulta General          |      25.00
+2025-11-25 09:00:00  | Servicio   | Baño y Corte Estándar     |      40.00
+2025-11-25 10:00:00  | Servicio   | Vacunación Anual          |      30.00
+2025-11-25 11:30:00  | Servicio   | Consulta General          |      25.00
+2025-11-26 09:00:00  | Servicio   | Consulta General          |      25.00
+2025-11-26 14:00:00  | Servicio   | Consulta General          |      25.00
+2025-11-26 15:00:00  | Servicio   | Consulta General          |      25.00
+2025-11-27 09:30:00  | Servicio   | Consulta General          |      25.00
+2025-11-27 11:00:00  | Servicio   | Análisis de Sangre        |      55.00
+2025-11-27 16:00:00  | Servicio   | Consulta General          |      25.00
+2025-11-28 15:00:00  | Servicio   | Baño y Corte Estándar     |      40.00
+------------------------------------------------------------
+TOTAL GENERAL                                              |    2015.00
+============================================================
+Generado: 2025-11-24 03:55:59

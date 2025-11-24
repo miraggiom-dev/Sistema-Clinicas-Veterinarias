@@ -1,0 +1,22 @@
+INFORME DE RENTABILIDAD - CONSULTA
+PERIODO: 11/2025
+================================================================================
+ID    | FECHA                | SERVICIO                  | CLIENTE              |      MONTO
+--------------------------------------------------------------------------------
+17    | 2025-11-24 10:00:00  | Cirugía Menor             | Luis Pérez           |     150.00
+1     | 2025-11-25 09:00:00  | Consulta General          | Ana García Robles    |      25.00
+15    | 2025-11-25 09:00:00  | Baño y Corte Estándar     | Thomas Velasquez     |      40.00
+2     | 2025-11-25 10:00:00  | Vacunación Anual          | Luis Pérez           |      30.00
+3     | 2025-11-25 11:30:00  | Consulta General          | Javier Rodríguez     |      25.00
+16    | 2025-11-26 09:00:00  | Consulta General          | Ricardo Gómez        |      25.00
+4     | 2025-11-26 14:00:00  | Consulta General          | Elena López          |      25.00
+5     | 2025-11-26 15:00:00  | Consulta General          | Mario Hernández      |      25.00
+6     | 2025-11-27 09:30:00  | Consulta General          | Valeria Torres       |      25.00
+7     | 2025-11-27 11:00:00  | Análisis de Sangre        | Diego Sánchez        |      55.00
+8     | 2025-11-27 16:00:00  | Consulta General          | Sofía Martínez       |      25.00
+10    | 2025-11-28 15:00:00  | Baño y Corte Estándar     | Ricardo Gómez        |      40.00
+--------------------------------------------------------------------------------
+TOTAL INGRESOS                                                            |     490.00
+CANTIDAD DE CITAS                                                         |         12
+================================================================================
+Generado: 2025-11-24 03:55:33

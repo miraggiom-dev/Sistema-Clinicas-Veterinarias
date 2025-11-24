@@ -39,7 +39,6 @@ class MascotaModel:
 
     @staticmethod
     def obtener_por_propietario(id_propietario):
-        """esto lo hizo thomas pa obtener todas las mascotas como las personas en bdd"""
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(

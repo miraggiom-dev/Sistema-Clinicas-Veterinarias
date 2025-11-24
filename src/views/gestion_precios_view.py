@@ -1,59 +1,113 @@
-
 import customtkinter as ctk
+from tkinter import messagebox
 
 class GestionPreciosView(ctk.CTkFrame):
     def __init__(self, master, controller, id_mascota=None, active_tab=None, switch_module_callback=None, **kwargs):
         super().__init__(master, **kwargs)
         self.controller = controller
         self.switch_module_callback = switch_module_callback
-        self.pack_propagate(False)
+        
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
 
-        ctk.CTkLabel(self, text="Gestión de Precios", font=("Roboto", 28, "bold")).pack(pady=10)
+        header = ctk.CTkFrame(self, fg_color="transparent")
+        header.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
+        ctk.CTkLabel(header, text="Gestión de Precios", font=("Roboto", 24, "bold")).pack(side="left")
 
-        self.tabview = ctk.CTkTabview(self)
-        self.tabview.pack(fill="both", expand=True, padx=20, pady=10)
-
+        self.tabview = ctk.CTkTabview(self, width=800)
+        self.tabview.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
+        
         self.tab_productos = self.tabview.add("Productos")
         self.tab_servicios = self.tabview.add("Servicios")
+
+        self.tab_productos.grid_columnconfigure(0, weight=1)
+        self.tab_productos.grid_rowconfigure(0, weight=1)
+        self.tab_servicios.grid_columnconfigure(0, weight=1)
+        self.tab_servicios.grid_rowconfigure(0, weight=1)
 
         self.crear_tabla_productos()
         self.crear_tabla_servicios()
 
     def crear_tabla_productos(self):
+
+        scroll = ctk.CTkScrollableFrame(self.tab_productos, fg_color="transparent")
+        scroll.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
         productos = self.controller.obtener_productos()
-        frame = ctk.CTkFrame(self.tab_productos)
-        frame.pack(fill="both", expand=True)
-        ctk.CTkLabel(frame, text="Nombre", width=200).grid(row=0, column=0)
-        ctk.CTkLabel(frame, text="Precio Actual", width=100).grid(row=0, column=1)
-        ctk.CTkLabel(frame, text="Nuevo Precio", width=100).grid(row=0, column=2)
-        ctk.CTkLabel(frame, text="Acción", width=100).grid(row=0, column=3)
-        self.producto_entries = {}
-        for i, prod in enumerate(productos, start=1):
-            ctk.CTkLabel(frame, text=prod[1], width=200).grid(row=i, column=0)
-            ctk.CTkLabel(frame, text=str(prod[4]), width=100).grid(row=i, column=1)
-            entry = ctk.CTkEntry(frame, width=100)
-            entry.grid(row=i, column=2)
-            btn = ctk.CTkButton(frame, text="Actualizar", width=100, command=lambda pid=prod[0], e=entry, n=prod[1]: self.actualizar_precio_producto(pid, e, n))
-            btn.grid(row=i, column=3)
-            self.producto_entries[prod[0]] = entry
+        
+        if not productos:
+             ctk.CTkLabel(scroll, text="No hay productos.", text_color="gray").pack(pady=20)
+             return
+
+        headers_frame = ctk.CTkFrame(scroll, fg_color="transparent")
+        headers_frame.pack(fill="x", pady=(0, 10))
+        
+        ctk.CTkLabel(headers_frame, text="Producto", font=("Roboto", 12, "bold"), width=300, anchor="w").pack(side="left", padx=10)
+        ctk.CTkLabel(headers_frame, text="Precio Actual", font=("Roboto", 12, "bold"), width=100).pack(side="left", padx=10)
+        ctk.CTkLabel(headers_frame, text="Nuevo Precio", font=("Roboto", 12, "bold"), width=120).pack(side="left", padx=10)
+
+        for prod in productos:
+            try:
+                pid = prod['id_producto']
+                nombre = prod['nombre']
+                precio = prod['precio_venta']
+            except Exception:
+                pid = prod[0]
+                nombre = prod[1]
+                precio = prod[2]
+
+            card = ctk.CTkFrame(scroll, fg_color=("#ffffff", "#3a3a3a"), corner_radius=8)
+            card.pack(fill="x", pady=5)
+
+            ctk.CTkLabel(card, text=nombre, font=("Roboto", 14), anchor="w", width=300).pack(side="left", padx=15, pady=10)
+            ctk.CTkLabel(card, text=f"${precio}", font=("Roboto", 14, "bold"), width=100).pack(side="left", padx=10)
+            
+            entry = ctk.CTkEntry(card, width=100, placeholder_text="0.00")
+            entry.pack(side="left", padx=10)
+            
+            btn = ctk.CTkButton(card, text="Actualizar", width=100, 
+                                command=lambda p=pid, e=entry, n=nombre: self.actualizar_precio_producto(p, e, n))
+            btn.pack(side="right", padx=15)
 
     def crear_tabla_servicios(self):
+        scroll = ctk.CTkScrollableFrame(self.tab_servicios, fg_color="transparent")
+        scroll.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
         servicios = self.controller.obtener_servicios()
-        frame = ctk.CTkFrame(self.tab_servicios)
-        frame.pack(fill="both", expand=True)
-        ctk.CTkLabel(frame, text="Nombre", width=200).grid(row=0, column=0)
-        ctk.CTkLabel(frame, text="Precio Actual", width=100).grid(row=0, column=1)
-        ctk.CTkLabel(frame, text="Nuevo Precio", width=100).grid(row=0, column=2)
-        ctk.CTkLabel(frame, text="Acción", width=100).grid(row=0, column=3)
-        self.servicio_entries = {}
-        for i, serv in enumerate(servicios, start=1):
-            ctk.CTkLabel(frame, text=serv[1], width=200).grid(row=i, column=0)
-            ctk.CTkLabel(frame, text=str(serv[2]), width=100).grid(row=i, column=1)
-            entry = ctk.CTkEntry(frame, width=100)
-            entry.grid(row=i, column=2)
-            btn = ctk.CTkButton(frame, text="Actualizar", width=100, command=lambda sid=serv[0], e=entry, n=serv[1]: self.actualizar_precio_servicio(sid, e, n))
-            btn.grid(row=i, column=3)
-            self.servicio_entries[serv[0]] = entry
+        
+        if not servicios:
+             ctk.CTkLabel(scroll, text="No hay servicios.", text_color="gray").pack(pady=20)
+             return
+
+        headers_frame = ctk.CTkFrame(scroll, fg_color="transparent")
+        headers_frame.pack(fill="x", pady=(0, 10))
+        
+        ctk.CTkLabel(headers_frame, text="Servicio", font=("Roboto", 12, "bold"), width=300, anchor="w").pack(side="left", padx=10)
+        ctk.CTkLabel(headers_frame, text="Precio Actual", font=("Roboto", 12, "bold"), width=100).pack(side="left", padx=10)
+        ctk.CTkLabel(headers_frame, text="Nuevo Precio", font=("Roboto", 12, "bold"), width=120).pack(side="left", padx=10)
+
+        for serv in servicios:
+            try:
+                sid = serv['id_servicio']
+                nombre = serv['nombre']
+                precio = serv['precio_base']
+            except Exception:
+                sid = serv[0]
+                nombre = serv[1]
+                precio = serv[3] 
+
+            card = ctk.CTkFrame(scroll, fg_color=("#ffffff", "#3a3a3a"), corner_radius=8)
+            card.pack(fill="x", pady=5)
+
+            ctk.CTkLabel(card, text=nombre, font=("Roboto", 14), anchor="w", width=300).pack(side="left", padx=15, pady=10)
+            ctk.CTkLabel(card, text=f"${precio}", font=("Roboto", 14, "bold"), width=100).pack(side="left", padx=10)
+            
+            entry = ctk.CTkEntry(card, width=100, placeholder_text="0.00")
+            entry.pack(side="left", padx=10)
+            
+            btn = ctk.CTkButton(card, text="Actualizar", width=100, 
+                                command=lambda s=sid, e=entry, n=nombre: self.actualizar_precio_servicio(s, e, n))
+            btn.pack(side="right", padx=15)
 
     def actualizar_precio_producto(self, id_producto, entry_widget, nombre):
         nuevo_precio = entry_widget.get()
@@ -65,6 +119,7 @@ class GestionPreciosView(ctk.CTkFrame):
         ok = self.controller.actualizar_precio_producto(id_producto, nuevo_precio)
         if ok:
             self.mostrar_actualizacion_exitosa("producto", nombre)
+            entry_widget.delete(0, "end")
         else:
             self.mostrar_error(f"No se pudo actualizar el precio de {nombre}")
 
@@ -78,11 +133,12 @@ class GestionPreciosView(ctk.CTkFrame):
         ok = self.controller.actualizar_precio_servicio(id_servicio, nuevo_precio)
         if ok:
             self.mostrar_actualizacion_exitosa("servicio", nombre)
+            entry_widget.delete(0, "end")
         else:
             self.mostrar_error(f"No se pudo actualizar el precio de {nombre}")
 
     def mostrar_actualizacion_exitosa(self, tipo, nombre):
-        ctk.CTkMessageBox(title="Éxito", message=f"Precio de {tipo} '{nombre}' actualizado correctamente.")
+        messagebox.showinfo("Éxito", f"Precio de {tipo} '{nombre}' actualizado correctamente.")
 
     def mostrar_error(self, mensaje):
-        ctk.CTkMessageBox(title="Error", message=mensaje)
+        messagebox.showerror("Error", mensaje)

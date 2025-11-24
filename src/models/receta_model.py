@@ -5,7 +5,7 @@ from sqlite3 import Error
 class RecetaModel:
     
     def get_pending_recipes(self):
-        """Obtiene todas las recetas en estado 'Emitida' para despacho (Query 1)."""
+
         conn = get_db_connection()
         if conn is None: return []
         
@@ -34,7 +34,7 @@ class RecetaModel:
 
     @staticmethod
     def crear(id_diagnostico, id_producto, cantidad):
-        """Crea una nueva receta asociada a un diagnóstico."""
+
         conn = get_db_connection()
         if conn is None:
             return False
@@ -56,9 +56,7 @@ class RecetaModel:
             conn.close()
 
     def process_dispatch(self, id_receta, id_producto, cantidad_requerida):
-        """
-        Maneja la transacción para reducir el stock y actualizar el estado de la receta.
-        """
+        
         conn = get_db_connection()
         if conn is None:
             return False, "Error de conexión a la base de datos."

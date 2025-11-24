@@ -38,10 +38,7 @@ class CitaModel:
 
     @staticmethod
     def verificar_disponibilidad(id_veterinario, fecha_inicio, fecha_fin, id_cita_actual=None):
-        """
-        Verifica si EL VETERINARIO ya está ocupado en ese rango de horas.
-        Lógica de solapamiento: (StartA < EndB) AND (EndA > StartB)
-        """
+       
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -87,9 +84,7 @@ class CitaModel:
 
     @staticmethod
     def modificar(id_cita, id_veterinario, fecha_hora, fecha_fin, motivo):
-        """
-        Permite cambiar horario o veterinario, verificando que el nuevo hueco esté libre.
-        """
+        
         if not CitaModel.verificar_disponibilidad(id_veterinario, fecha_hora, fecha_fin, id_cita_actual=id_cita):
             msg = f"El veterinario ya tiene una cita en el horario {fecha_hora} - {fecha_fin}."
             return False, msg
@@ -112,6 +107,7 @@ class CitaModel:
 
     @staticmethod
     def cancelar(id_cita):
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
@@ -126,7 +122,7 @@ class CitaModel:
 
     @staticmethod
     def actualizar_estado(id_cita, nuevo_estado):
-        """Actualiza el campo 'estado' de una cita."""
+
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
@@ -145,10 +141,7 @@ class CitaModel:
 
     @staticmethod
     def obtener_agenda_del_dia(fecha_filtro):
-        """
-        Muestra la agenda completa del día con Nombres reales (JOINs).
-        fecha_filtro debe ser string formato 'YYYY-MM-DD'
-        """
+      
         conn = get_db_connection()
         cursor = conn.cursor()
         

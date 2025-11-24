@@ -2,7 +2,7 @@ from models.usuario_model import UsuarioModel
 
 class AuthController:
     def __init__(self):
-        self.usuario_actual = None  # Aquí guardaremos quién inició sesión
+        self.usuario_actual = None  
 
     def login(self, email, password):
 

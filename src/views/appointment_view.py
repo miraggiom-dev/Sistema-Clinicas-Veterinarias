@@ -3,6 +3,7 @@ from controllers.appointment_controller import AppointmentController
 from controllers.admission_controller import AdmissionController
 
 class AppointmentView(ctk.CTkFrame):
+    
     def __init__(self, master, auth_controller, id_mascota=None, active_tab=None, switch_callback=None):
         super().__init__(master)
         

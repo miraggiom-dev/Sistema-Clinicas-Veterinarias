@@ -1,5 +1,8 @@
 import customtkinter as ctk
 from views.comprobante_view import ComprobanteView
+from views.payment_report_view import PaymentReportView
+from views.service_view import ServiceView
+from views.profitability_report_view import ProfitabilityReportView
 
 
 class DashboardView(ctk.CTkFrame):
@@ -13,12 +16,10 @@ class DashboardView(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # Enhanced sidebar with darker background
         self.sidebar = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color="#1a1a1a")
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
 
-        # Main area with subtle background
         self.main_area = ctk.CTkFrame(self, fg_color="#242424", corner_radius=10)
         self.main_area.grid(row=0, column=1, sticky="nsew", padx=15, pady=15)
 
@@ -26,7 +27,7 @@ class DashboardView(ctk.CTkFrame):
         self.crear_menu_opciones()
 
     def crear_sidebar_widgets(self, usuario, rol):
-        # Logo section
+
         logo_frame = ctk.CTkFrame(self.sidebar, fg_color="#2a2a2a", corner_radius=10)
         logo_frame.pack(pady=25, padx=15, fill="x")
         
@@ -39,7 +40,6 @@ class DashboardView(ctk.CTkFrame):
         )
         self.lbl_logo.pack(pady=15)
 
-        # User info card
         user_frame = ctk.CTkFrame(self.sidebar, fg_color="#252525", corner_radius=8)
         user_frame.pack(pady=(10, 25), padx=15, fill="x")
         
@@ -60,7 +60,6 @@ class DashboardView(ctk.CTkFrame):
             wraplength=180
         ).pack(pady=(0, 10))
 
-        # Menu section label
         ctk.CTkLabel(
             self.sidebar,
             text="MENÚ",
@@ -71,7 +70,6 @@ class DashboardView(ctk.CTkFrame):
         self.menu_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         self.menu_frame.pack(fill="both", expand=True, padx=10)
 
-        # Logout button at bottom
         self.btn_salir = ctk.CTkButton(
             self.sidebar,
             text="Cerrar Sesión",
@@ -102,13 +100,14 @@ class DashboardView(ctk.CTkFrame):
                 ("Citas", "AppointmentView"),
                 ("Diagnósticos", "DiagnosisView"),
                 ("Tratamientos", "TreatmentView"),
-                #("Medicamentos", "MedicationsView"),
             ]
         elif self.rol == "Administrador":
             opciones = [
-                ("Reportes", "ReportsView"),
+                ("Informes de Rentabilidad", "ProfitabilityReportView"),
                 ("Gestión de Precios", "GestionPreciosView"),
-                ("Usuarios", "UsersView")
+                ("Usuarios", "UsersView"),
+                ("Servicios", "ServiceView"),
+                ("Informes de Pagos", "PaymentReportView")
             ]
         elif self.rol == "Farmacéutico":
             opciones = [("Farmacia", "FarmaceutaView")]
@@ -118,6 +117,10 @@ class DashboardView(ctk.CTkFrame):
         for nombre, view_key in opciones:
             if view_key == 'ComprobanteView':
                 cmd = lambda n=nombre: ComprobanteView(self)
+            elif view_key == 'PaymentReportView':
+                cmd = lambda n=nombre: PaymentReportView(self)
+            elif view_key == 'ProfitabilityReportView':
+                cmd = lambda n=nombre: ProfitabilityReportView(self)
             else:
                 cmd = lambda key=view_key, btn_name=nombre: self.switch_module_with_highlight(key, btn_name)
             
@@ -134,16 +137,14 @@ class DashboardView(ctk.CTkFrame):
                 command=cmd
             )
             btn.pack(fill="x", pady=3, padx=5)
-            btn._view_key = view_key  # Store for later reference
+            btn._view_key = view_key 
 
     def switch_module_with_highlight(self, view_key, btn_name):
-        """Switch module and highlight the active button"""
-        # Reset all buttons
+
         for widget in self.menu_frame.winfo_children():
             if isinstance(widget, ctk.CTkButton):
                 widget.configure(fg_color="transparent", text_color="#cccccc")
         
-        # Highlight active button
         for widget in self.menu_frame.winfo_children():
             if isinstance(widget, ctk.CTkButton) and hasattr(widget, '_view_key') and widget._view_key == view_key:
                 widget.configure(fg_color="#2a5a8a", text_color="white")
@@ -152,5 +153,5 @@ class DashboardView(ctk.CTkFrame):
         self.switch_module_callback(view_key)
 
     def get_main_area(self):
-        """Retorna el frame principal donde se cargan los módulos."""
+
         return self.main_area

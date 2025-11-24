@@ -23,7 +23,6 @@ class LoginView(ctk.CTkFrame):
         )
         self.label_titulo.pack(pady=(40, 10), padx=50)
         
-        # Subtitle
         ctk.CTkLabel(
             self.center_frame,
             text="Iniciar Sesión",
@@ -31,7 +30,6 @@ class LoginView(ctk.CTkFrame):
             text_color="#aaaaaa"
         ).pack(pady=(0, 30), padx=50)
 
-        # Email field with label
         ctk.CTkLabel(
             self.center_frame,
             text="Correo Electrónico",
@@ -49,7 +47,6 @@ class LoginView(ctk.CTkFrame):
         )
         self.entry_email.pack(pady=(0, 15), padx=50)
 
-        # Password field with label
         ctk.CTkLabel(
             self.center_frame,
             text="Contraseña",
@@ -68,7 +65,6 @@ class LoginView(ctk.CTkFrame):
         )
         self.entry_pass.pack(pady=(0, 25), padx=50)
         
-        # Bind Enter key
         self.entry_email.bind("<Return>", self.evento_login)
         self.entry_pass.bind("<Return>", self.evento_login)
 

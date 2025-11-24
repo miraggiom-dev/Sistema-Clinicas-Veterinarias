@@ -95,11 +95,9 @@ class VetHistoryView(ctk.CTkFrame):
         card = ctk.CTkFrame(self.scroll_historial, fg_color="#2b2b2b")
         card.pack(fill="x", pady=5, padx=5)
 
-        # Header: Version (Left) - Date (Right)
         header = ctk.CTkFrame(card, fg_color="transparent")
         header.pack(fill="x", padx=10, pady=5)
         
-        # Version and Status
         version_text = f"Versión {entry['version']}"
         if entry['es_actual']:
             version_text += " (ACTUAL)"
@@ -110,40 +108,31 @@ class VetHistoryView(ctk.CTkFrame):
 
         ctk.CTkLabel(header, text=version_text, font=("Roboto", 12, "bold"), text_color=color_version).pack(side="left", anchor="n")
         
-        # Date (Right)
         ctk.CTkLabel(header, text=f"{entry['fecha']}", font=("Roboto", 12)).pack(side="right", anchor="n")
 
-        # Content
         content = ctk.CTkFrame(card, fg_color="transparent")
         content.pack(fill="x", padx=10, pady=5)
 
-        # Veterinario
         ctk.CTkLabel(content, text="Veterinario:", font=("Roboto", 12, "bold")).pack(anchor="w")
         ctk.CTkLabel(content, text=entry['veterinario'], wraplength=400, justify="left").pack(anchor="w", pady=(0, 5))
 
-        # Diagnostico
         ctk.CTkLabel(content, text="Diagnóstico:", font=("Roboto", 12, "bold")).pack(anchor="w")
         ctk.CTkLabel(content, text=entry['diagnostico'], wraplength=400, justify="left").pack(anchor="w", pady=(0, 5))
 
-        # Tratamiento
         ctk.CTkLabel(content, text="Tratamiento:", font=("Roboto", 12, "bold")).pack(anchor="w")
         ctk.CTkLabel(content, text=entry['tratamiento'], wraplength=400, justify="left").pack(anchor="w", pady=(0, 5))
 
-        # Observacion
         if entry['observacion_edicion']:
             ctk.CTkLabel(content, text="Observación:", font=("Roboto", 12, "bold")).pack(anchor="w")
             ctk.CTkLabel(content, text=entry['observacion_edicion'], wraplength=400, justify="left").pack(anchor="w")
 
-        # Edit Button (Only for Veterinarians and Current Version)
-        # Debug print
-        # print(f"DEBUG: Rol actual: '{self.rol}'")
         
         if self.rol and self.rol.strip().lower() == "veterinario" and entry['es_actual']:
             btn_edit = ctk.CTkButton(
                 card, 
                 text="Editar Diagnóstico", 
                 height=30,
-                fg_color="red", # Changed to red
+                fg_color="red", 
                 hover_color="darkred",
                 text_color="white",
                 command=lambda e=entry: self.editar_diagnostico(e)
@@ -173,7 +162,6 @@ class VetHistoryView(ctk.CTkFrame):
         txt_trat.pack(pady=5, padx=20)
         txt_trat.insert(0, entry['tratamiento'])
 
-        # Separator
         ctk.CTkLabel(dialog, text="", height=10).pack()
         ctk.CTkLabel(
             dialog, 
@@ -202,20 +190,15 @@ class VetHistoryView(ctk.CTkFrame):
                 lbl_error.configure(text="Debe ingresar su contraseña para firmar")
                 return
 
-            # Obtener el usuario actual del controller si está disponible
             id_veterinario_actual = None
             email_veterinario = None
             
-            # Intentar obtener del controller
             if hasattr(self, 'controller') and self.controller and hasattr(self.controller, 'usuario_actual'):
                 if self.controller.usuario_actual:
                     id_veterinario_actual = self.controller.usuario_actual.id_usuario
                     email_veterinario = self.controller.usuario_actual.email
 
-            # Si no tenemos el email del controller, necesitamos buscarlo por nombre
-            # Esto es un fallback, idealmente siempre deberíamos tener el controller
             if not email_veterinario:
-                # Buscar el usuario por nombre en la base de datos
                 usuarios = UsuarioModel.obtener_todos()
                 for user in usuarios:
                     if user['nombre_completo'] == self.usuario:
@@ -227,28 +210,24 @@ class VetHistoryView(ctk.CTkFrame):
                 lbl_error.configure(text="Error: No se pudo verificar el usuario actual")
                 return
 
-            # Verificar contraseña
             usuario_verificado = UsuarioModel.autenticar(email_veterinario, password)
             
             if not usuario_verificado:
                 lbl_error.configure(text="Contraseña incorrecta")
                 return
 
-            # Contraseña correcta, proceder a guardar
             fecha_actual = datetime.now().strftime("%Y-%m-%d")
             observacion = f"Editado por: {self.usuario}, {fecha_actual}"
             
-            # La firma será el nombre completo del veterinario que está editando
             firma = self.usuario
 
-            # Guardar con el ID del veterinario actual (quien está editando)
             exito = DiagnosisController.registrar_diagnostico(
                 entry['id_cita'],
-                id_veterinario_actual,  # ID del veterinario que está editando
+                id_veterinario_actual,  
                 nuevo_diag,
                 nuevo_trat,
                 observacion,
-                firma=firma  # Firma con el nombre del veterinario actual
+                firma=firma  
             )
 
             if exito:

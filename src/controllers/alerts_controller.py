@@ -8,10 +8,7 @@ class AlertsController:
         self._six_months = timedelta(days=182)
 
     def obtener_alertas(self):
-        """
-        Busca todas las mascotas y filtra las que no han venido en 6 meses.
-        Retorna una lista de diccionarios lista para usar en la vista.
-        """
+        
         alertas = []
         
         clientes = self.admission_controller.buscar_clientes("") or []
@@ -51,7 +48,7 @@ class AlertsController:
         return alertas
 
     def _calcular_ultima_visita(self, id_mascota):
-        """Obtiene el historial desde el Modelo y devuelve un objeto datetime o None."""
+
         try:
             rows = CitaModel.obtener_historial_mascota(id_mascota)
             if not rows: return None

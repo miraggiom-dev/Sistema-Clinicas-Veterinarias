@@ -1,12 +1,10 @@
 import customtkinter as ctk
-from controllers.treatment_controller import TreatmentController
 from tkinter import messagebox
 
 
 class TreatmentView(ctk.CTkFrame):
     def __init__(self, master, controller=None, id_mascota=None, active_tab=None, switch_callback=None):
         super().__init__(master)
-        self.treatment_controller = TreatmentController()
         self.pack(fill="both", expand=True)
         self.crear_widgets()
 
@@ -14,7 +12,6 @@ class TreatmentView(ctk.CTkFrame):
         from models.mascota_model import MascotaModel
         from models.producto_model import ProductoModel
 
-        # Card container
         self.center_frame = ctk.CTkFrame(
             self, 
             fg_color="#2a2a2a",
@@ -24,7 +21,6 @@ class TreatmentView(ctk.CTkFrame):
         )
         self.center_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Title
         self.lbl_titulo = ctk.CTkLabel(
             self.center_frame, 
             text="Registrar Receta (Tratamiento)", 
@@ -33,7 +29,6 @@ class TreatmentView(ctk.CTkFrame):
         )
         self.lbl_titulo.pack(pady=(30, 20), padx=40)
 
-        # Mascota
         self.mascotas = MascotaModel.obtener_todas_con_propietario()
         self.mascota_map = {
             f"{m['nombre']} (Dueño: {m['propietario_nombre']})": m
@@ -57,7 +52,6 @@ class TreatmentView(ctk.CTkFrame):
         )
         self.cmb_mascota.pack(pady=(0, 15), padx=40)
 
-        # Producto (medicamento)
         self.productos = ProductoModel.obtener_todos()
         self.producto_map = {
             f"{p['nombre']} (Stock: {p['stock_actual']})": p for p in self.productos
@@ -80,7 +74,6 @@ class TreatmentView(ctk.CTkFrame):
         )
         self.cmb_producto.pack(pady=(0, 15), padx=40)
 
-        # Cantidad
         self.txt_cantidad = ctk.CTkEntry(
             self.center_frame, 
             placeholder_text="Cantidad a prescribir", 
@@ -90,7 +83,6 @@ class TreatmentView(ctk.CTkFrame):
         )
         self.txt_cantidad.pack(pady=8, padx=40)
 
-        # Bind Enter key
         self.txt_cantidad.bind("<Return>", self.registrar_tratamiento)
 
         self.btn_guardar = ctk.CTkButton(
@@ -150,7 +142,7 @@ class TreatmentView(ctk.CTkFrame):
         id_diagnostico = diagnostico["id_diagnostico"]
         producto = self.producto_map[producto_key]
         id_producto = producto["id_producto"]
-        # Validar stock
+
         if producto["stock_actual"] < cantidad:
             messagebox.showerror(
                 "Error", f"Stock insuficiente. Stock actual: {producto['stock_actual']}"
