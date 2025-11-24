@@ -1,5 +1,8 @@
 import customtkinter as ctk
 from views.comprobante_view import ComprobanteView
+from views.payment_report_view import PaymentReportView
+from views.service_view import ServiceView
+from views.profitability_report_view import ProfitabilityReportView
 
 
 class DashboardView(ctk.CTkFrame):
@@ -101,9 +104,11 @@ class DashboardView(ctk.CTkFrame):
             ]
         elif self.rol == "Administrador":
             opciones = [
-                ("Reportes", "ReportsView"),
+                ("Informes de Rentabilidad", "ProfitabilityReportView"),
                 ("Gestión de Precios", "GestionPreciosView"),
-                ("Usuarios", "UsersView")
+                ("Usuarios", "UsersView"),
+                ("Servicios", "ServiceView"),
+                ("Informes de Pagos", "PaymentReportView")
             ]
         elif self.rol == "Farmacéutico":
             opciones = [("Farmacia", "FarmaceutaView")]
@@ -113,6 +118,10 @@ class DashboardView(ctk.CTkFrame):
         for nombre, view_key in opciones:
             if view_key == 'ComprobanteView':
                 cmd = lambda n=nombre: ComprobanteView(self)
+            elif view_key == 'PaymentReportView':
+                cmd = lambda n=nombre: PaymentReportView(self)
+            elif view_key == 'ProfitabilityReportView':
+                cmd = lambda n=nombre: ProfitabilityReportView(self)
             else:
                 cmd = lambda key=view_key, btn_name=nombre: self.switch_module_with_highlight(key, btn_name)
             
